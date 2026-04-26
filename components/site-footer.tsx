@@ -45,7 +45,7 @@ export function SiteFooter() {
       />
 
       {/* Newsletter ribbon */}
-      <div className="relative mx-auto max-w-7xl px-8 pt-14 pb-10 lg:px-12">
+      <div className="relative mx-auto px-8 pt-14 pb-10 lg:max-w-[1200px] lg:px-12 xl:max-w-[1536px]">
         <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[1fr_auto] lg:gap-10">
           <div className="space-y-2">
             <p className="text-[10px] font-semibold tracking-[0.32em] text-[oklch(0.78_0.04_70)] uppercase">
@@ -79,11 +79,11 @@ export function SiteFooter() {
       </div>
 
       {/* Hairline */}
-      <div className="relative mx-auto max-w-7xl px-8 lg:px-12">
+      <div className="relative mx-auto max-w-7xl px-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1536px]">
         <div className="editorial-rule h-px w-full opacity-30" />
       </div>
 
-      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-8 py-14 font-display text-sm md:grid-cols-4 lg:px-12">
+      <div className="relative mx-auto grid max-w-7xl grid-cols-1 gap-12 px-8 py-14 font-display text-sm md:grid-cols-4 lg:max-w-[1200px] lg:px-12 xl:max-w-[1536px]">
         <div className="space-y-6">
           <Link href="#" className="flex items-baseline gap-1.5">
             <span className="font-display text-2xl font-black tracking-[0.05em] text-[oklch(0.97_0.012_78)] uppercase">

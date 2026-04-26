@@ -208,34 +208,34 @@ export default function HomePage() {
           className="animate-drift-alt pointer-events-none absolute right-[8%] bottom-[10%] z-0 hidden size-64 rounded-full bg-[oklch(0.92_0.024_75/0.5)] blur-3xl lg:block"
           style={{ animationDelay: "-3s" }}
         />
-
-        <div className="relative z-10 flex w-full flex-col justify-center px-8 py-16 lg:w-1/2 lg:px-16 lg:py-20">
-          {/* eyebrow group */}
-          <div className="flex flex-col gap-3">
-            <div className="inline-flex w-fit items-center gap-3">
-              <span className="h-px w-10 bg-[oklch(0.6_0.062_60)]" />
-              <span className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
-                Spring · Summer 2026
-              </span>
+        <div className="mx-auto flex w-full items-center justify-between lg:max-w-[1200px] xl:max-w-[1535px]">
+          <div className="relative z-10 flex w-full flex-col justify-center px-8 py-16 lg:w-1/2 lg:px-16 lg:py-20">
+            {/* eyebrow group */}
+            <div className="flex flex-col gap-3">
+              <div className="inline-flex w-fit items-center gap-3">
+                <span className="h-px w-10 bg-[oklch(0.6_0.062_60)]" />
+                <span className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
+                  Spring · Summer 2026
+                </span>
+              </div>
+              <p className="font-display text-[12px] font-semibold tracking-[0.42em] text-[oklch(0.34_0.03_55)] uppercase">
+                ✦ Hôm nay bạn muốn mặc gì? ✦
+              </p>
             </div>
-            <p className="font-display text-[12px] font-semibold tracking-[0.42em] text-[oklch(0.34_0.03_55)] uppercase">
-              ✦ Hôm nay bạn muốn mặc gì? ✦
-            </p>
-          </div>
 
-          <div className="mt-5 flex flex-col gap-2 lg:mt-6 lg:gap-3">
-            <h1 className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.02em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[68px]">
-              Ngàn outfit
-            </h1>
-            <p className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.01em] text-[oklch(0.6_0.062_60)] italic lg:text-[68px]">
-              mới luôn sẵn sàng
-            </p>
-            <p className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.02em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[68px]">
-              cho bạn.
-            </p>
-          </div>
+            <div className="mt-5 flex flex-col gap-2 lg:mt-6 lg:gap-3">
+              <h1 className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.02em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[68px]">
+                Ngàn outfit
+              </h1>
+              <p className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.01em] text-[oklch(0.6_0.062_60)] italic lg:text-[68px]">
+                mới luôn sẵn sàng
+              </p>
+              <p className="font-display text-[40px] leading-[0.98] font-medium tracking-[-0.02em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[68px]">
+                cho bạn.
+              </p>
+            </div>
 
-          {/* <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-[oklch(0.4_0.024_55)] lg:mt-7">
+            {/* <p className="mt-6 max-w-xl text-[15px] leading-[1.7] text-[oklch(0.4_0.024_55)] lg:mt-7">
             StyleLoop mang cả{" "}
             <span className="text-[oklch(0.34_0.03_55)] italic">
               “tủ đồ online”
@@ -245,137 +245,138 @@ export default function HomePage() {
             tục, mà chi phí chỉ bằng một nửa so với thị trường.
           </p> */}
 
-          <div className="mt-8 flex flex-wrap gap-3">
-            <Button className="ribbon-tan group/btn relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full px-6 py-3 text-[11px] font-semibold tracking-[0.22em] uppercase transition-[transform,box-shadow] duration-500 ease-out hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-14px_oklch(0.34_0.03_55/0.55)] active:translate-y-0 active:duration-100 lg:w-auto">
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(90deg,transparent_0%,oklch(0.97_0.012_78/0.35)_45%,oklch(0.97_0.012_78/0.55)_50%,oklch(0.97_0.012_78/0.35)_55%,transparent_100%)] transition-transform duration-[900ms] ease-out group-hover/btn:translate-x-[120%]"
-              />
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 rounded-full opacity-0 ring-1 ring-[oklch(0.97_0.012_78/0.22)] transition-opacity duration-500 ring-inset group-hover/btn:opacity-100"
-              />
-              <span className="relative flex items-center gap-3">
-                Khám phá tủ đồ
-                <ArrowRight className="size-4 transition-transform duration-300 ease-out group-hover/btn:translate-x-1.5" />
-              </span>
-            </Button>
+            <div className="mt-8 flex flex-wrap gap-3">
+              <Button className="ribbon-tan group/btn relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full px-6 py-3 text-[11px] font-semibold tracking-[0.22em] uppercase transition-[transform,box-shadow] duration-500 ease-out hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-14px_oklch(0.34_0.03_55/0.55)] active:translate-y-0 active:duration-100 lg:w-auto">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(90deg,transparent_0%,oklch(0.97_0.012_78/0.35)_45%,oklch(0.97_0.012_78/0.55)_50%,oklch(0.97_0.012_78/0.35)_55%,transparent_100%)] transition-transform duration-[900ms] ease-out group-hover/btn:translate-x-[120%]"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 rounded-full opacity-0 ring-1 ring-[oklch(0.97_0.012_78/0.22)] transition-opacity duration-500 ring-inset group-hover/btn:opacity-100"
+                />
+                <span className="relative flex items-center gap-3">
+                  Khám phá tủ đồ
+                  <ArrowRight className="size-4 transition-transform duration-300 ease-out group-hover/btn:translate-x-1.5" />
+                </span>
+              </Button>
 
-            <Button
-              variant="outline"
-              className="group/btn2 relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full border !border-[oklch(0.18_0.014_55)] bg-transparent px-6 py-3 text-[11px] font-semibold tracking-[0.22em] text-[oklch(0.18_0.014_55)] uppercase transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-16px_oklch(0.18_0.014_55/0.5)] active:translate-y-0 lg:w-auto"
-            >
-              <span
-                aria-hidden
-                className="pointer-events-none absolute inset-0 translate-y-full bg-[oklch(0.18_0.014_55)] transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/btn2:translate-y-0"
-              />
-              <span className="relative flex items-center gap-3 transition-colors duration-500 group-hover/btn2:text-[oklch(0.97_0.012_78)]">
-                Cho thuê đồ
-                <Heart className="size-4 transition-all duration-500 ease-out group-hover/btn2:scale-110 group-hover/btn2:fill-[oklch(0.6_0.062_60)] group-hover/btn2:stroke-[oklch(0.6_0.062_60)]" />
-              </span>
-            </Button>
+              <Button
+                variant="outline"
+                className="group/btn2 relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full border !border-[oklch(0.18_0.014_55)] bg-transparent px-6 py-3 text-[11px] font-semibold tracking-[0.22em] text-[oklch(0.18_0.014_55)] uppercase transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-16px_oklch(0.18_0.014_55/0.5)] active:translate-y-0 lg:w-auto"
+              >
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-0 translate-y-full bg-[oklch(0.18_0.014_55)] transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/btn2:translate-y-0"
+                />
+                <span className="relative flex items-center gap-3 transition-colors duration-500 group-hover/btn2:text-[oklch(0.97_0.012_78)]">
+                  Cho thuê đồ
+                  <Heart className="size-4 transition-all duration-500 ease-out group-hover/btn2:scale-110 group-hover/btn2:fill-[oklch(0.6_0.062_60)] group-hover/btn2:stroke-[oklch(0.6_0.062_60)]" />
+                </span>
+              </Button>
+            </div>
+
+            <div className="mt-10 grid w-full grid-cols-3 gap-0 divide-x divide-[oklch(0.86_0.018_70)] border-y border-[oklch(0.86_0.018_70)] py-5 lg:mt-12">
+              <div className="px-6 text-center">
+                <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
+                  10k+
+                </p>
+                <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
+                  Outfits
+                </p>
+              </div>
+              <div className="px-6 text-center">
+                <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
+                  4.9★
+                </p>
+                <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
+                  2,500 reviews
+                </p>
+              </div>
+              <div className="px-6 text-center">
+                <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
+                  24h
+                </p>
+                <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
+                  Toàn quốc
+                </p>
+              </div>
+            </div>
           </div>
 
-          <div className="mt-10 grid w-full grid-cols-3 gap-0 divide-x divide-[oklch(0.86_0.018_70)] border-y border-[oklch(0.86_0.018_70)] py-5 lg:mt-12">
-            <div className="px-6 text-center">
-              <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
-                10k+
-              </p>
-              <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
-                Outfits
-              </p>
-            </div>
-            <div className="px-6 text-center">
-              <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
-                4.9★
-              </p>
-              <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
-                2,500 reviews
-              </p>
-            </div>
-            <div className="px-6 text-center">
-              <p className="font-display text-3xl font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
-                24h
-              </p>
-              <p className="mt-1 text-center text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.5_0.024_60)] uppercase">
-                Toàn quốc
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* RIGHT — editorial collage */}
-        <div className="relative flex h-[560px] w-full items-center justify-center overflow-hidden p-8 lg:h-[740px] lg:w-1/2">
-          <div
-            aria-hidden
-            className="animate-blob absolute top-10 right-10 size-96 bg-[oklch(0.86_0.034_70/0.6)] opacity-70 blur-2xl"
-          />
-
-          <div className="relative size-full max-w-xl">
-            {/* Frame 1 */}
-            <div className="rotated-card-1 absolute top-8 left-0 z-10 h-2/3 w-2/3 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_30px_60px_-30px_oklch(0.34_0.03_55/0.5)] ring-1 ring-[oklch(0.86_0.018_70)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/Home-Img/image-1.png"
-                alt="Vibrant yellow dress fashion"
-                className="size-full object-cover grayscale-[0.05]"
-              />
-              <div className="absolute right-3 bottom-2 left-3 flex items-center justify-between">
-                <span className="font-display text-[10px] tracking-[0.22em] text-[oklch(0.34_0.03_55)] uppercase">
-                  Linn Midi
-                </span>
-                <span className="text-[10px] tracking-[0.22em] text-[oklch(0.6_0.062_60)] uppercase">
-                  N°01
-                </span>
-              </div>
-            </div>
-
-            {/* Frame 2 */}
-            <div className="rotated-card-2 absolute right-0 bottom-8 z-20 h-3/5 w-3/5 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_30px_60px_-30px_oklch(0.34_0.03_55/0.5)] ring-1 ring-[oklch(0.86_0.018_70)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/Home-Img/image-2.png"
-                alt="Editorial streetwear model"
-                className="size-full object-cover grayscale-[0.05]"
-              />
-              <div className="absolute top-3 right-3 rounded-full bg-[oklch(0.18_0.014_55)] px-3 py-1 text-[10px] tracking-[0.22em] text-[oklch(0.97_0.012_78)] uppercase">
-                3 ngày
-              </div>
-              <div className="absolute right-3 bottom-2 left-3 flex items-center justify-between">
-                <span className="font-display text-[10px] tracking-[0.22em] text-[oklch(0.34_0.03_55)] uppercase">
-                  Casual Blazer
-                </span>
-                <span className="text-[10px] tracking-[0.22em] text-[oklch(0.6_0.062_60)] uppercase">
-                  N°02
-                </span>
-              </div>
-            </div>
-
-            {/* Frame 3 — center */}
-            <div className="rotated-card-3 absolute top-1/2 left-1/2 z-30 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_36px_70px_-30px_oklch(0.34_0.03_55/0.55)] ring-1 ring-[oklch(0.86_0.018_70)]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src="/Home-Img/image-3.png"
-                alt="Minimalist clothing rack"
-                className="size-full object-cover grayscale-[0.05]"
-              />
-              <div className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-[oklch(0.99_0.008_78)] shadow-md">
-                <Heart className="size-4 fill-[oklch(0.6_0.062_60)] stroke-[oklch(0.6_0.062_60)]" />
-              </div>
-              <p className="absolute bottom-1 left-1/2 -translate-x-1/2 font-display text-[11px] tracking-[0.32em] text-[oklch(0.6_0.062_60)] uppercase">
-                Style Soulmate
-              </p>
-            </div>
-
-            {/* tiny decorations */}
-            <Star
-              className="animate-twinkle absolute top-6 right-12 size-6 fill-[oklch(0.78_0.04_70)] stroke-[oklch(0.6_0.062_60)]"
-              style={{ animationDelay: "0.4s" }}
+          {/* RIGHT — editorial collage */}
+          <div className="relative flex h-[560px] w-full items-center justify-center overflow-hidden p-8 lg:h-[740px] lg:w-1/2">
+            <div
+              aria-hidden
+              className="animate-blob absolute top-10 right-10 size-96 bg-[oklch(0.86_0.034_70/0.6)] opacity-70 blur-2xl"
             />
-            <Sparkles
-              className="animate-float-soft absolute bottom-24 left-6 size-9 fill-[oklch(0.86_0.034_70)] stroke-[oklch(0.6_0.062_60)]"
-              style={{ ["--spin" as string]: "-8deg" } as React.CSSProperties}
-            />
+
+            <div className="relative size-full max-w-xl">
+              {/* Frame 1 */}
+              <div className="rotated-card-1 absolute top-8 left-0 z-10 h-2/3 w-2/3 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_30px_60px_-30px_oklch(0.34_0.03_55/0.5)] ring-1 ring-[oklch(0.86_0.018_70)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/Home-Img/image-1.png"
+                  alt="Vibrant yellow dress fashion"
+                  className="size-full object-cover grayscale-[0.05]"
+                />
+                <div className="absolute right-3 bottom-2 left-3 flex items-center justify-between">
+                  <span className="font-display text-[10px] tracking-[0.22em] text-[oklch(0.34_0.03_55)] uppercase">
+                    Linn Midi
+                  </span>
+                  <span className="text-[10px] tracking-[0.22em] text-[oklch(0.6_0.062_60)] uppercase">
+                    N°01
+                  </span>
+                </div>
+              </div>
+
+              {/* Frame 2 */}
+              <div className="rotated-card-2 absolute right-0 bottom-8 z-20 h-3/5 w-3/5 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_30px_60px_-30px_oklch(0.34_0.03_55/0.5)] ring-1 ring-[oklch(0.86_0.018_70)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/Home-Img/image-2.png"
+                  alt="Editorial streetwear model"
+                  className="size-full object-cover grayscale-[0.05]"
+                />
+                <div className="absolute top-3 right-3 rounded-full bg-[oklch(0.18_0.014_55)] px-3 py-1 text-[10px] tracking-[0.22em] text-[oklch(0.97_0.012_78)] uppercase">
+                  3 ngày
+                </div>
+                <div className="absolute right-3 bottom-2 left-3 flex items-center justify-between">
+                  <span className="font-display text-[10px] tracking-[0.22em] text-[oklch(0.34_0.03_55)] uppercase">
+                    Casual Blazer
+                  </span>
+                  <span className="text-[10px] tracking-[0.22em] text-[oklch(0.6_0.062_60)] uppercase">
+                    N°02
+                  </span>
+                </div>
+              </div>
+
+              {/* Frame 3 — center */}
+              <div className="rotated-card-3 absolute top-1/2 left-1/2 z-30 h-1/2 w-1/2 -translate-x-1/2 -translate-y-1/2 overflow-hidden rounded-sm bg-[oklch(0.99_0.008_78)] p-2.5 pb-10 shadow-[0_36px_70px_-30px_oklch(0.34_0.03_55/0.55)] ring-1 ring-[oklch(0.86_0.018_70)]">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src="/Home-Img/image-3.png"
+                  alt="Minimalist clothing rack"
+                  className="size-full object-cover grayscale-[0.05]"
+                />
+                <div className="absolute top-3 right-3 flex size-9 items-center justify-center rounded-full bg-[oklch(0.99_0.008_78)] shadow-md">
+                  <Heart className="size-4 fill-[oklch(0.6_0.062_60)] stroke-[oklch(0.6_0.062_60)]" />
+                </div>
+                <p className="absolute bottom-1 left-1/2 -translate-x-1/2 font-display text-[11px] tracking-[0.32em] text-[oklch(0.6_0.062_60)] uppercase">
+                  Style Soulmate
+                </p>
+              </div>
+
+              {/* tiny decorations */}
+              <Star
+                className="animate-twinkle absolute top-6 right-12 size-6 fill-[oklch(0.78_0.04_70)] stroke-[oklch(0.6_0.062_60)]"
+                style={{ animationDelay: "0.4s" }}
+              />
+              <Sparkles
+                className="animate-float-soft absolute bottom-24 left-6 size-9 fill-[oklch(0.86_0.034_70)] stroke-[oklch(0.6_0.062_60)]"
+                style={{ ["--spin" as string]: "-8deg" } as React.CSSProperties}
+              />
+            </div>
           </div>
         </div>
       </section>
@@ -391,7 +392,7 @@ export default function HomePage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,oklch(0.6_0.062_60/0.6),transparent)]"
         />
 
-        <div className="relative mx-auto grid max-w-7xl grid-cols-1 items-center gap-12 px-8 py-24 lg:grid-cols-[1fr_1.2fr] lg:gap-20 lg:px-12 lg:py-32">
+        <div className="relative mx-auto grid lg:max-w-[1200px] xl:max-w-[1535px] grid-cols-1 items-center gap-12 px-8 py-24 lg:grid-cols-[1fr_1.2fr] lg:gap-20 lg:px-12 lg:py-32">
           <div className="relative">
             <div className="relative overflow-hidden rounded-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -502,7 +503,7 @@ export default function HomePage() {
           aria-hidden
           className="bg-halftone-tan pointer-events-none absolute inset-x-0 top-10 mx-auto h-[420px] max-w-5xl opacity-30"
         />
-        <div className="relative mx-auto max-w-7xl px-8 py-28">
+        <div className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28">
           <div className="mb-20 flex flex-col items-center gap-5 text-center">
             <div className="flex items-center gap-3">
               <span className="h-px w-10 bg-[oklch(0.6_0.062_60)]" />
@@ -571,7 +572,7 @@ export default function HomePage() {
           className="animate-drift-alt absolute right-[8%] -bottom-20 size-72 rounded-full bg-[oklch(0.92_0.024_75/0.4)] blur-3xl"
           style={{ animationDelay: "-4s" }}
         />
-        <div className="relative mx-auto mb-12 flex max-w-7xl flex-col items-start justify-between gap-4 px-8 lg:flex-row lg:items-end lg:px-12">
+        <div className="relative mx-auto mb-12 flex lg:max-w-[1200px] xl:max-w-[1535px] flex-col items-start justify-between gap-4 px-8 lg:flex-row lg:items-end lg:px-12">
           <div className="space-y-3">
             <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
               ✦ Bộ sưu tập ✦
@@ -591,7 +592,7 @@ export default function HomePage() {
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
-        <div className="relative no-scrollbar flex gap-6 overflow-x-auto px-8 pb-8 lg:px-12">
+        <div className="relative no-scrollbar mx-auto flex gap-6 overflow-x-auto px-8 pb-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
           {CATEGORIES.map((category) => (
             <CategoryCard key={category.name} {...category} />
           ))}
@@ -610,7 +611,7 @@ export default function HomePage() {
       </section>
 
       {/* ─────────── HOT PRODUCTS ─────────── */}
-      <section className="relative mx-auto max-w-7xl px-8 py-28 lg:px-12">
+      <section className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28 lg:px-12">
         <div
           aria-hidden
           className="pointer-events-none absolute top-20 right-6 -z-10 size-72 rounded-full bg-[oklch(0.91_0.026_70/0.35)] blur-3xl"
@@ -663,7 +664,7 @@ export default function HomePage() {
           className="bg-halftone-tan pointer-events-none absolute inset-0 opacity-50"
         />
 
-        <div className="relative mx-auto max-w-7xl px-8 lg:px-12">
+        <div className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 lg:px-12">
           <div className="mb-16 space-y-4 text-center">
             <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
               ✦ Vì sao chọn chúng tôi ✦
@@ -726,7 +727,7 @@ export default function HomePage() {
       </section>
 
       {/* ─────────── TESTIMONIALS ─────────── */}
-      <section className="relative mx-auto max-w-7xl px-8 py-28 lg:px-12">
+      <section className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28 lg:px-12">
         <div className="mb-16 flex flex-col items-center gap-4 text-center">
           <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
             ✦ Diary entries ✦
@@ -744,7 +745,7 @@ export default function HomePage() {
       </section>
 
       {/* ─────────── CTA ─────────── */}
-      <section className="mx-6 mb-24 lg:mx-10">
+      <section className="mx-6 mb-24 lg:mx-auto lg:mb-24 lg:max-w-[1200px] lg:px-10 xl:max-w-[1535px]">
         <div className="relative overflow-hidden rounded-md bg-[oklch(0.18_0.014_55)] p-10 lg:p-16">
           <div
             aria-hidden

@@ -1,23 +1,41 @@
 "use client"
 
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { useState } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import {
+  ArrowRight,
   Bell,
   ChevronDown,
   Heart,
+  LayoutDashboard,
+  LogIn,
+  LogOut,
   Menu,
+  Package,
   Plus,
   Search,
+  Shield,
   ShoppingBag,
+  Store,
+  User,
+  UserPlus,
   X,
 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 import { cn } from "@/lib/utils"
+import { ROLE_LABEL, useAuthStore } from "@/lib/store/auth-store"
 
 type NavItem = {
   label: string
@@ -48,12 +66,65 @@ function isActive(pathname: string, item: NavItem): boolean {
   return pathname === item.href
 }
 
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((p) => p.trim()[0])
+    .filter(Boolean)
+    .slice(-2)
+    .join("")
+    .toUpperCase()
+}
+
 export function SiteHeader() {
   const pathname = usePathname() ?? "/"
+  const router = useRouter()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [mobileShopOpen, setMobileShopOpen] = useState(false)
+  const [accountOpen, setAccountOpen] = useState(false)
+  const accountRef = useRef<HTMLDivElement | null>(null)
+
+  // Auth — guard against SSR/hydration mismatch by reading after mount
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const user = useAuthStore((s) => s.user)
+  const logout = useAuthStore((s) => s.logout)
+  const hydrated = useSyncExternalStore(
+    (cb) => useAuthStore.persist.onFinishHydration(cb),
+    () => useAuthStore.persist.hasHydrated(),
+    () => false
+  )
+  const authed = hydrated && isAuthenticated && !!user
+
+  // Close account dropdown on outside click / esc
+  useEffect(() => {
+    if (!accountOpen) return
+    function handleClick(e: MouseEvent) {
+      if (
+        accountRef.current &&
+        !accountRef.current.contains(e.target as Node)
+      ) {
+        setAccountOpen(false)
+      }
+    }
+    function handleKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setAccountOpen(false)
+    }
+    document.addEventListener("mousedown", handleClick)
+    document.addEventListener("keydown", handleKey)
+    return () => {
+      document.removeEventListener("mousedown", handleClick)
+      document.removeEventListener("keydown", handleKey)
+    }
+  }, [accountOpen])
 
   const closeMobile = () => setMobileOpen(false)
+
+  const handleLogout = () => {
+    logout()
+    setAccountOpen(false)
+    setMobileOpen(false)
+    router.push("/")
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[oklch(0.86_0.018_70)]/70 bg-[oklch(0.965_0.012_78)]/85 backdrop-blur-xl">
@@ -93,10 +164,10 @@ export function SiteHeader() {
             onClick={closeMobile}
             className="group flex shrink-0 items-baseline gap-1.5 transition-transform duration-300 hover:scale-[1.02]"
           >
-            <span className="font-display text-2xl font-black uppercase tracking-[0.05em] text-[oklch(0.18_0.014_55)] lg:text-[26px]">
+            <span className="font-display text-2xl font-black tracking-[0.05em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[26px]">
               Style
             </span>
-            <span className="font-display text-2xl font-medium italic tracking-tight text-[oklch(0.6_0.062_60)] lg:text-[26px]">
+            <span className="font-display text-2xl font-medium tracking-tight text-[oklch(0.6_0.062_60)] italic lg:text-[26px]">
               Loop
             </span>
           </Link>
@@ -124,7 +195,7 @@ export function SiteHeader() {
                     {active && (
                       <span
                         aria-hidden
-                        className="absolute -bottom-0.5 left-3 right-3 h-px bg-[oklch(0.6_0.062_60)]"
+                        className="absolute right-3 -bottom-0.5 left-3 h-px bg-[oklch(0.6_0.062_60)]"
                       />
                     )}
                   </Link>
@@ -171,7 +242,7 @@ export function SiteHeader() {
               type="text"
               placeholder="Tìm váy, croptop, Y2K..."
               aria-label="Tìm sản phẩm"
-              className="w-60 rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] px-5 py-2 pr-10 text-[13px] text-[oklch(0.24_0.018_55)] placeholder:text-[oklch(0.55_0.024_60)] shadow-none transition-colors focus-visible:border-[oklch(0.6_0.062_60)] focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.18)]"
+              className="w-60 rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] px-5 py-2 pr-10 text-[13px] text-[oklch(0.24_0.018_55)] shadow-none transition-colors placeholder:text-[oklch(0.55_0.024_60)] focus-visible:border-[oklch(0.6_0.062_60)] focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.18)]"
             />
             <Search className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[oklch(0.5_0.024_60)]" />
           </div>
@@ -200,34 +271,219 @@ export function SiteHeader() {
             </Button>
           </Link>
 
-          {/* Thông báo — desktop only */}
-          <Button
-            variant="ghost"
-            size="icon"
-            aria-label="Thông báo"
-            className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
-          >
-            <Bell className="size-5" />
-            <span className="absolute top-2 right-2 size-1.5 rounded-full bg-[oklch(0.6_0.062_60)] ring-2 ring-[oklch(0.965_0.012_78)]" />
-          </Button>
+          {/* Thông báo — desktop only, only when logged in */}
+          {authed && (
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Thông báo"
+              className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
+            >
+              <Bell className="size-5" />
+              <span className="absolute top-2 right-2 size-1.5 rounded-full bg-[oklch(0.6_0.062_60)] ring-2 ring-[oklch(0.965_0.012_78)]" />
+            </Button>
+          )}
 
-          {/* Tài khoản */}
-          <Link
-            href="/account"
-            aria-label="Tài khoản của tôi"
-            onClick={closeMobile}
-            className="ml-1"
-          >
-            <Avatar className="size-9 cursor-pointer ring-1 ring-[oklch(0.78_0.04_70)] ring-offset-2 ring-offset-[oklch(0.965_0.012_78)] transition-transform duration-300 hover:scale-105 lg:size-10">
-              <AvatarImage
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBixHHYZVqp19yPuDTKIWBEwx-R0Ybt4P8_fMiXC7DRpe3bkIbn3CRPCd0_5umTgOjW8aGFajsaCoBXkibXYF_bCjlbm09lOcN00x8STitg_cKGRfCD4CUlbDwDxeT2_33FvwFiE8BKRf6OAUHB9utmGiD7dRJfkHdTBikBSmwyYiaxcENYClVESsAW_fJ537RFxg4ARXpmigdqBjezIiZiVE0fG6J_f0Md1GuoWPMb-qrjIycEwXRxue3nP4Y1EmubRx0PMiOqC78"
-                alt="User avatar"
-              />
-              <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[oklch(0.34_0.03_55)]">
-                SL
-              </AvatarFallback>
-            </Avatar>
-          </Link>
+          {/* ───────── Tài khoản ───────── */}
+          {!authed ? (
+            <div className="ml-1 flex items-center gap-1.5 sm:gap-2">
+              {/* ── Mobile: dropdown menu ── */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    size="icon"
+                    aria-label="Tài khoản"
+                    className="ribbon-tan size-10 cursor-pointer rounded-full sm:hidden"
+                  >
+                    <UserPlus className="size-4" strokeWidth={1.6} />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="w-56 rounded-md border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.35)]"
+                >
+                  <DropdownMenuLabel className="text-[10px] font-semibold tracking-[0.32em] text-[oklch(0.55_0.024_60)] uppercase">
+                    Tài khoản
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-[oklch(0.9_0.014_72)]" />
+                  <DropdownMenuItem
+                    asChild
+                    className="cursor-pointer rounded-sm py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] focus:bg-[oklch(0.94_0.014_75)] focus:text-[oklch(0.6_0.062_60)]"
+                  >
+                    <Link
+                      href="/login"
+                      onClick={closeMobile}
+                      className="flex items-center gap-3"
+                    >
+                      <LogIn className="size-4 opacity-70" strokeWidth={1.4} />
+                      Đăng nhập
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    asChild
+                    className="cursor-pointer rounded-sm py-2.5 text-[13px] font-medium text-[oklch(0.18_0.014_55)] focus:bg-[oklch(0.94_0.014_75)] focus:text-[oklch(0.6_0.062_60)]"
+                  >
+                    <Link
+                      href="/register"
+                      onClick={closeMobile}
+                      className="flex items-center gap-3"
+                    >
+                      <UserPlus
+                        className="size-4 text-[oklch(0.6_0.062_60)]"
+                        strokeWidth={1.4}
+                      />
+                      <span>Đăng ký</span>
+                    </Link>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* ── sm+: full pair as before ── */}
+              <Link
+                href="/login"
+                onClick={closeMobile}
+                className="hidden sm:block"
+              >
+                <Button
+                  variant="outline"
+                  className="h-9 cursor-pointer rounded-full border border-[oklch(0.18_0.014_55)]! bg-transparent px-4 text-[11px] font-semibold tracking-[0.18em] text-[oklch(0.18_0.014_55)] uppercase transition-colors duration-200 hover:border-[oklch(0.6_0.062_60)]! hover:bg-transparent hover:text-[oklch(0.6_0.062_60)] md:px-5 md:text-[12px] md:tracking-[0.22em]"
+                >
+                  Đăng nhập
+                </Button>
+              </Link>
+              <Link
+                href="/register"
+                onClick={closeMobile}
+                className="hidden sm:block"
+              >
+                <Button className="group/reg ribbon-tan h-9 cursor-pointer rounded-full pr-3 pl-4 text-[11px] font-semibold tracking-[0.18em] uppercase md:pr-3.5 md:pl-5 md:text-[12px] md:tracking-[0.22em]">
+                  Đăng ký
+                  <ArrowRight
+                    className="size-3.5 transition-transform duration-300 ease-out group-hover/reg:translate-x-0.5"
+                    strokeWidth={1.6}
+                  />
+                </Button>
+              </Link>
+            </div>
+          ) : (
+            <div className="relative ml-1" ref={accountRef}>
+              <button
+                type="button"
+                aria-haspopup="menu"
+                aria-expanded={accountOpen}
+                aria-label="Tài khoản của tôi"
+                onClick={() => setAccountOpen((v) => !v)}
+                className="cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.45)] focus-visible:outline-none"
+              >
+                <Avatar className="size-9 ring-1 ring-[oklch(0.78_0.04_70)] ring-offset-2 ring-offset-[oklch(0.965_0.012_78)] transition-transform duration-300 hover:scale-105 lg:size-10">
+                  {user?.avatar && (
+                    <AvatarImage src={user.avatar} alt={user.name} />
+                  )}
+                  <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[12px] font-semibold tracking-wider text-[oklch(0.34_0.03_55)]">
+                    {user ? getInitials(user.name) : "SL"}
+                  </AvatarFallback>
+                </Avatar>
+              </button>
+
+              {/* Dropdown */}
+              <div
+                role="menu"
+                className={cn(
+                  "absolute top-full right-0 z-50 mt-2 w-72 origin-top-right overflow-hidden rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.35)] backdrop-blur-xl transition-[opacity,transform] duration-200",
+                  accountOpen
+                    ? "visible translate-y-0 opacity-100"
+                    : "invisible -translate-y-1 opacity-0"
+                )}
+              >
+                {/* Profile head */}
+                <div className="flex items-center gap-3 border-b border-[oklch(0.9_0.014_72)] bg-[oklch(0.97_0.012_78)] px-4 py-3.5">
+                  <Avatar className="size-11 ring-1 ring-[oklch(0.78_0.04_70)]">
+                    {user?.avatar && (
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                    )}
+                    <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[13px] font-semibold text-[oklch(0.34_0.03_55)]">
+                      {user ? getInitials(user.name) : "SL"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-[15px] font-medium text-[oklch(0.18_0.014_55)]">
+                      {user?.name}
+                    </p>
+                    <p className="truncate text-[11px] text-[oklch(0.5_0.024_60)]">
+                      {user?.email}
+                    </p>
+                    {user && (
+                      <span className="mt-1 inline-flex items-center gap-1 rounded-sm bg-[oklch(0.6_0.062_60)] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.22em] text-white uppercase">
+                        {user.role === "admin" && (
+                          <Shield className="size-2.5" />
+                        )}
+                        {user.role === "supplier" && (
+                          <Store className="size-2.5" />
+                        )}
+                        {user.role === "user" && <User className="size-2.5" />}
+                        {ROLE_LABEL[user.role]}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {/* Menu items */}
+                <div className="p-1.5">
+                  <Link
+                    href="/account"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                  >
+                    <User className="size-4 opacity-70" strokeWidth={1.4} />
+                    Tài khoản của tôi
+                  </Link>
+                  <Link
+                    href="/account/orders"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                  >
+                    <Package className="size-4 opacity-70" strokeWidth={1.4} />
+                    Đơn thuê của tôi
+                  </Link>
+
+                  {user?.role === "admin" && (
+                    <Link
+                      href="/admin"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                    >
+                      <LayoutDashboard
+                        className="size-4 opacity-70"
+                        strokeWidth={1.4}
+                      />
+                      Bảng điều khiển
+                    </Link>
+                  )}
+
+                  {user?.role === "supplier" && (
+                    <Link
+                      href="/supplier"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                    >
+                      <Store className="size-4 opacity-70" strokeWidth={1.4} />
+                      Cửa hàng của tôi
+                    </Link>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-1 flex w-full cursor-pointer items-center gap-3 border-t border-[oklch(0.9_0.014_72)] px-3 pt-3 pb-2.5 text-[13px] font-medium text-[oklch(0.45_0.06_30)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.55_0.12_30)]"
+                  >
+                    <LogOut className="size-4 opacity-70" strokeWidth={1.4} />
+                    Đăng xuất
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </nav>
 
@@ -235,7 +491,7 @@ export function SiteHeader() {
       <div
         className={cn(
           "overflow-hidden border-t border-[oklch(0.86_0.018_70)]/70 bg-[oklch(0.99_0.008_78)] backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
-          mobileOpen ? "max-h-[80vh] opacity-100" : "max-h-0 opacity-0"
+          mobileOpen ? "max-h-[85vh] opacity-100" : "max-h-0 opacity-0"
         )}
       >
         <div className="space-y-1 px-4 pt-3 pb-5">
@@ -321,17 +577,110 @@ export function SiteHeader() {
             )
           })}
 
+          {/* Auth block (mobile) */}
+          <div className="mt-4 border-t border-[oklch(0.9_0.014_72)] pt-4">
+            {!authed ? (
+              <div className="flex flex-col gap-2">
+                <Link href="/login" onClick={closeMobile}>
+                  <Button
+                    variant="outline"
+                    className="h-auto w-full cursor-pointer rounded-full border border-[oklch(0.34_0.03_55)] bg-transparent px-5 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase hover:bg-[oklch(0.18_0.014_55)] hover:text-[oklch(0.97_0.012_78)]"
+                  >
+                    <LogIn className="size-4" />
+                    Đăng nhập
+                  </Button>
+                </Link>
+                <Link href="/register" onClick={closeMobile}>
+                  <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase">
+                    <UserPlus className="size-4" />
+                    Đăng ký tài khoản
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <div className="flex items-center gap-3 px-2 pb-3">
+                  <Avatar className="size-11 ring-1 ring-[oklch(0.78_0.04_70)]">
+                    {user?.avatar && (
+                      <AvatarImage src={user.avatar} alt={user.name} />
+                    )}
+                    <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[13px] font-semibold text-[oklch(0.34_0.03_55)]">
+                      {user ? getInitials(user.name) : "SL"}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-[15px] font-medium text-[oklch(0.18_0.014_55)]">
+                      {user?.name}
+                    </p>
+                    <p className="truncate text-[11px] text-[oklch(0.5_0.024_60)]">
+                      {user && ROLE_LABEL[user.role]}
+                    </p>
+                  </div>
+                </div>
+                <Link
+                  href="/account"
+                  onClick={closeMobile}
+                  className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                >
+                  <User className="size-4 opacity-70" strokeWidth={1.4} />
+                  Tài khoản của tôi
+                </Link>
+                <Link
+                  href="/account/orders"
+                  onClick={closeMobile}
+                  className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                >
+                  <Package className="size-4 opacity-70" strokeWidth={1.4} />
+                  Đơn thuê của tôi
+                </Link>
+                {user?.role === "admin" && (
+                  <Link
+                    href="/admin"
+                    onClick={closeMobile}
+                    className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                  >
+                    <LayoutDashboard
+                      className="size-4 opacity-70"
+                      strokeWidth={1.4}
+                    />
+                    Bảng điều khiển
+                  </Link>
+                )}
+                {user?.role === "supplier" && (
+                  <Link
+                    href="/supplier"
+                    onClick={closeMobile}
+                    className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                  >
+                    <Store className="size-4 opacity-70" strokeWidth={1.4} />
+                    Cửa hàng của tôi
+                  </Link>
+                )}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full cursor-pointer items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.45_0.06_30)] hover:bg-[oklch(0.94_0.014_75)]"
+                >
+                  <LogOut className="size-4 opacity-70" strokeWidth={1.4} />
+                  Đăng xuất
+                </button>
+              </div>
+            )}
+          </div>
+
           {/* CTA — Cho thuê đồ (mobile) */}
-          <Link
-            href="/account/owner/new"
-            onClick={closeMobile}
-            className="mt-3 block"
-          >
-            <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[13px] font-semibold tracking-[0.12em] uppercase">
-              <Plus className="size-4" />
-              Cho thuê đồ
-            </Button>
-          </Link>
+          {authed && (
+            <Link
+              href="/account/owner/new"
+              onClick={closeMobile}
+              className="mt-3 block"
+            >
+              <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[13px] font-semibold tracking-[0.12em] uppercase">
+                <Plus className="size-4" />
+                Cho thuê đồ
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
     </header>
