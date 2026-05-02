@@ -2,11 +2,19 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  useCallback,
+} from "react"
+import {
+  ArrowLeft,
   ArrowRight,
   Bell,
   ChevronDown,
+  ChevronRight,
   Heart,
   LayoutDashboard,
   LogIn,
@@ -34,8 +42,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { ROLE_LABEL, useAuthStore } from "@/lib/store/auth-store"
+import Image from "next/image"
 
 type NavItem = {
   label: string
@@ -79,12 +94,14 @@ function getInitials(name: string): string {
 export function SiteHeader() {
   const pathname = usePathname() ?? "/"
   const router = useRouter()
-  const [mobileOpen, setMobileOpen] = useState(false)
+
   const [mobileShopOpen, setMobileShopOpen] = useState(false)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState("")
   const [accountOpen, setAccountOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement | null>(null)
+  const searchRef = useRef<HTMLInputElement | null>(null)
 
-  // Auth — guard against SSR/hydration mismatch by reading after mount
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
@@ -99,12 +116,8 @@ export function SiteHeader() {
   useEffect(() => {
     if (!accountOpen) return
     function handleClick(e: MouseEvent) {
-      if (
-        accountRef.current &&
-        !accountRef.current.contains(e.target as Node)
-      ) {
+      if (accountRef.current && !accountRef.current.contains(e.target as Node))
         setAccountOpen(false)
-      }
     }
     function handleKey(e: KeyboardEvent) {
       if (e.key === "Escape") setAccountOpen(false)
@@ -117,14 +130,29 @@ export function SiteHeader() {
     }
   }, [accountOpen])
 
-  const closeMobile = () => setMobileOpen(false)
+  // Auto-focus search input when mobile search opens
+  useEffect(() => {
+    if (mobileSearchOpen) {
+      setTimeout(() => searchRef.current?.focus(), 150)
+    }
+  }, [mobileSearchOpen])
 
   const handleLogout = () => {
     logout()
     setAccountOpen(false)
-    setMobileOpen(false)
     router.push("/")
   }
+
+  const handleSearch = useCallback(
+    (value: string) => {
+      const kw = value.trim()
+      if (!kw) return
+      router.push(`/products?keyword=${encodeURIComponent(kw)}`)
+      setMobileSearchOpen(false)
+      setSearchValue("")
+    },
+    [router]
+  )
 
   return (
     <header className="sticky top-0 z-50 w-full border-b border-[oklch(0.86_0.018_70)]/70 bg-[oklch(0.965_0.012_78)]/85 backdrop-blur-xl">
@@ -139,29 +167,270 @@ export function SiteHeader() {
         </span>
       </div>
 
-      <nav className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-4 py-3 lg:gap-4 lg:px-8">
-        {/* LEFT — hamburger (mobile) + logo + nav (desktop) */}
-        <div className="flex items-center gap-2 lg:gap-8">
-          {/* Mobile hamburger */}
+      {/* ── Mobile search — fixed overlay covering header ── */}
+      <div
+        className={cn(
+          "fixed inset-x-0 top-0 z-[60] flex items-center gap-2 border-b border-[oklch(0.86_0.018_70)] bg-[oklch(0.965_0.012_78)] px-4 backdrop-blur-xl transition-transform duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] lg:hidden",
+          mobileSearchOpen
+            ? "pointer-events-auto translate-y-0"
+            : "pointer-events-none -translate-y-full"
+        )}
+        style={{ height: "var(--header-h, 100px)" }}
+      >
+        <button
+          type="button"
+          onClick={() => {
+            setMobileSearchOpen(false)
+            setSearchValue("")
+          }}
+          className="flex size-10 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.91_0.022_75)]"
+          aria-label="Đóng tìm kiếm"
+        >
+          <ArrowLeft className="size-5" />
+        </button>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            handleSearch(searchValue)
+          }}
+          className="flex flex-1 items-center gap-2"
+        >
+          <Input
+            ref={searchRef}
+            type="text"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            placeholder="Tìm váy, croptop, Y2K..."
+            className="flex-1 rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] px-4 text-[13px] text-[oklch(0.24_0.018_55)] shadow-none placeholder:text-[oklch(0.55_0.024_60)] focus-visible:border-[oklch(0.6_0.062_60)] focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.18)]"
+          />
           <Button
-            variant="ghost"
-            size="icon"
-            aria-label={mobileOpen ? "Đóng menu" : "Mở menu"}
-            aria-expanded={mobileOpen}
-            onClick={() => setMobileOpen((v) => !v)}
-            className="size-10 shrink-0 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
+            type="submit"
+            className="ribbon-tan shrink-0 cursor-pointer rounded-full px-4 py-2 text-[11px] font-bold tracking-[0.18em] uppercase"
           >
-            {mobileOpen ? (
-              <X className="size-5" />
-            ) : (
-              <Menu className="size-5" />
-            )}
+            <Search className="size-4" />
+            Tìm
           </Button>
+        </form>
+      </div>
 
+      <nav className="mx-auto flex max-w-screen-2xl items-center justify-between gap-2 px-4 py-3 lg:gap-4 lg:px-8">
+        {/* LEFT — Sheet (mobile) + logo + nav (desktop) */}
+        <div className="flex items-center gap-2 lg:gap-8">
+          {/* ── Mobile menu — shadcn Sheet ── */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Mở menu"
+                className="size-10 shrink-0 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
+              >
+                <Menu className="size-5" />
+              </Button>
+            </SheetTrigger>
+
+            <SheetContent
+              side="left"
+              className="w-[80vw] max-w-[320px] border-r border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
+            >
+              {/* Sheet header */}
+              <div className="flex items-center justify-between border-b border-[oklch(0.86_0.018_70)] px-5 py-4">
+                <Link href="/" className="flex items-baseline gap-1">
+                  <span className="font-display text-xl font-black tracking-[0.05em] text-[oklch(0.18_0.014_55)] uppercase">
+                    Style
+                  </span>
+                  <span className="font-display text-xl font-medium text-[oklch(0.6_0.062_60)] italic">
+                    Loop
+                  </span>
+                </Link>
+                <SheetClose asChild>
+                  <button className="flex size-8 cursor-pointer items-center justify-center rounded-full text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.91_0.022_75)]">
+                    <X className="size-4" />
+                  </button>
+                </SheetClose>
+              </div>
+
+              {/* Nav items — NO search here */}
+              <div className="overflow-y-auto px-3 py-3">
+                {NAV_ITEMS.map((item) => {
+                  const active = isActive(pathname, item)
+                  if (item.hasMenu) {
+                    return (
+                      <div key={item.label}>
+                        <button
+                          type="button"
+                          onClick={() => setMobileShopOpen((v) => !v)}
+                          className={cn(
+                            "flex w-full cursor-pointer items-center justify-between rounded-md px-4 py-3 text-[14px] font-medium tracking-[0.04em] transition-colors",
+                            active
+                              ? "bg-[oklch(0.94_0.014_75)] text-[oklch(0.18_0.014_55)]"
+                              : "text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                          )}
+                        >
+                          <span>{item.label}</span>
+                          <ChevronDown
+                            className={cn(
+                              "size-4 opacity-60 transition-transform duration-200",
+                              mobileShopOpen && "rotate-180"
+                            )}
+                          />
+                        </button>
+                        <div
+                          className={cn(
+                            "overflow-hidden transition-[max-height,opacity] duration-200",
+                            mobileShopOpen
+                              ? "max-h-80 opacity-100"
+                              : "max-h-0 opacity-0"
+                          )}
+                        >
+                          <div className="mt-1 ml-3 space-y-0.5 border-l border-[oklch(0.86_0.018_70)] pl-3">
+                            {SHOP_CATEGORIES.map((cat) => (
+                              <SheetClose key={cat.label} asChild>
+                                <Link
+                                  href={cat.href}
+                                  className="flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium text-[oklch(0.4_0.024_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                                >
+                                  <span>{cat.label}</span>
+                                  {cat.tag && (
+                                    <span className="rounded-sm bg-[oklch(0.6_0.062_60)] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.18em] text-white">
+                                      {cat.tag}
+                                    </span>
+                                  )}
+                                </Link>
+                              </SheetClose>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return (
+                    <SheetClose key={item.label} asChild>
+                      <Link
+                        href={item.href}
+                        className={cn(
+                          "flex items-center rounded-md px-4 py-3 text-[14px] font-medium tracking-[0.04em] transition-colors",
+                          active
+                            ? "bg-[oklch(0.94_0.014_75)] text-[oklch(0.18_0.014_55)]"
+                            : "text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                        )}
+                      >
+                        {item.label}
+                      </Link>
+                    </SheetClose>
+                  )
+                })}
+                {/* Divider */}
+                {/* <div className="my-3 border-t border-[oklch(0.9_0.014_72)]" /> */}
+                {/* Auth block
+                {!authed ? (
+                  <div className="flex flex-col gap-2 px-1">
+                    <SheetClose asChild>
+                      <Link href="/login">
+                        <button className="flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border-2 border-[oklch(0.18_0.014_55)] bg-[oklch(0.18_0.014_55)] px-5 text-[12px] font-bold tracking-[0.22em] text-[oklch(0.97_0.012_78)] uppercase transition-colors hover:bg-[oklch(0.34_0.03_55)]">
+                          <LogIn className="size-4" /> Đăng nhập
+                        </button>
+                      </Link>
+                    </SheetClose>
+                    <SheetClose asChild>
+                      <Link href="/register">
+                        <button className="ribbon-tan flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full px-5 text-[12px] font-bold tracking-[0.22em] uppercase">
+                          <UserPlus className="size-4" /> Đăng ký tài khoản
+                        </button>
+                      </Link>
+                    </SheetClose>
+                  </div>
+                ) : (
+                  <div className="space-y-0.5 px-1">
+                    <div className="flex items-center gap-3 px-3 pb-3">
+                      <Avatar className="size-10 ring-1 ring-[oklch(0.78_0.04_70)]">
+                        {user?.avatar && (
+                          <AvatarImage src={user.avatar} alt={user.name} />
+                        )}
+                        <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[13px] font-semibold text-[oklch(0.34_0.03_55)]">
+                          {user ? getInitials(user.name) : "SL"}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="min-w-0">
+                        <p className="truncate font-display text-[15px] font-medium text-[oklch(0.18_0.014_55)]">
+                          {user?.name}
+                        </p>
+                        <p className="text-[11px] text-[oklch(0.5_0.024_60)]">
+                          {user && ROLE_LABEL[user.role]}
+                        </p>
+                      </div>
+                    </div>
+
+                    {[
+                      {
+                        href: "/account",
+                        icon: User,
+                        label: "Tài khoản của tôi",
+                        show: true,
+                      },
+                      {
+                        href: "/account/orders",
+                        icon: Package,
+                        label: "Đơn thuê của tôi",
+                        show: true,
+                      },
+                      {
+                        href: "/admin",
+                        icon: LayoutDashboard,
+                        label: "Bảng điều khiển",
+                        show: user?.role === "admin",
+                      },
+                      {
+                        href: "/supplier",
+                        icon: Store,
+                        label: "Cửa hàng của tôi",
+                        show: user?.role === "supplier",
+                      },
+                    ]
+                      .filter((i) => i.show)
+                      .map((i) => (
+                        <SheetClose key={i.href} asChild>
+                          <Link
+                            href={i.href}
+                            className="flex items-center gap-3 rounded-md px-3 py-2.5 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
+                          >
+                            <i.icon
+                              className="size-4 opacity-70"
+                              strokeWidth={1.4}
+                            />
+                            {i.label}
+                          </Link>
+                        </SheetClose>
+                      ))}
+
+                    <button
+                      type="button"
+                      onClick={handleLogout}
+                      className="flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-[14px] font-medium text-[oklch(0.45_0.06_30)] hover:bg-[oklch(0.94_0.014_75)]"
+                    >
+                      <LogOut className="size-4 opacity-70" strokeWidth={1.4} />
+                      Đăng xuất
+                    </button>
+
+                    {user?.role === "supplier" && (
+                      <SheetClose asChild>
+                        <Link href="/account/owner/new" className="mt-2 block">
+                          <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[13px] font-semibold tracking-[0.12em] uppercase">
+                            <Plus className="size-4" /> Cho thuê đồ
+                          </Button>
+                        </Link>
+                      </SheetClose>
+                    )}
+                  </div>
+                )} */}
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Logo */}
           <Link
             href="/"
             aria-label="StyleLoop — về trang chủ"
-            onClick={closeMobile}
             className="group flex shrink-0 items-baseline gap-1.5 transition-transform duration-300 hover:scale-[1.02]"
           >
             <span className="font-display text-2xl font-black tracking-[0.05em] text-[oklch(0.18_0.014_55)] uppercase lg:text-[26px]">
@@ -170,6 +439,13 @@ export function SiteHeader() {
             <span className="font-display text-2xl font-medium tracking-tight text-[oklch(0.6_0.062_60)] italic lg:text-[26px]">
               Loop
             </span>
+            {/* <Image
+              src={"/styleloop_logo.png"}
+              alt="StyleLoop"
+              // className="scale-[1.25]"
+              width={120}
+              height={40}
+            /> */}
           </Link>
 
           {/* Desktop nav */}
@@ -236,29 +512,49 @@ export function SiteHeader() {
 
         {/* RIGHT — actions */}
         <div className="flex items-center gap-1 lg:gap-2">
-          {/* Search — desktop inline */}
-          <div className="relative hidden lg:block">
+          {/* Desktop search — navigates to /products?keyword=... */}
+          <form
+            onSubmit={(e) => {
+              e.preventDefault()
+              const kw = (
+                e.currentTarget.elements.namedItem("q") as HTMLInputElement
+              ).value.trim()
+              if (kw) router.push(`/products?keyword=${encodeURIComponent(kw)}`)
+            }}
+            className="relative hidden lg:block"
+          >
             <Input
+              name="q"
               type="text"
               placeholder="Tìm váy, croptop, Y2K..."
               aria-label="Tìm sản phẩm"
-              className="w-60 rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] px-5 py-2 pr-10 text-[13px] text-[oklch(0.24_0.018_55)] shadow-none transition-colors placeholder:text-[oklch(0.55_0.024_60)] focus-visible:border-[oklch(0.6_0.062_60)] focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.18)]"
+              className="w-60 rounded-full border border-[oklch(0.6_0.062_60)] border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] px-5 py-2 pr-10 text-[13px] text-[oklch(0.24_0.018_55)] shadow-none ring-2 ring-[oklch(0.6_0.062_60/0.18)] transition-colors placeholder:text-[oklch(0.55_0.024_60)]"
             />
-            <Search className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-[oklch(0.5_0.024_60)]" />
-          </div>
+            <button
+              type="submit"
+              className="absolute top-1/2 right-3 -translate-y-1/2 cursor-pointer text-[oklch(0.5_0.024_60)] transition-colors hover:text-[oklch(0.6_0.062_60)]"
+            >
+              <Search className="size-4" />
+            </button>
+          </form>
 
-          {/* Search — mobile icon */}
+          {/* Mobile search toggle — triggers slide-down bar, NOT the Sheet */}
           <Button
             variant="ghost"
             size="icon"
             aria-label="Tìm kiếm"
+            onClick={() => setMobileSearchOpen((v) => !v)}
             className="size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
           >
-            <Search className="size-5" />
+            {mobileSearchOpen ? (
+              <X className="size-5" />
+            ) : (
+              <Search className="size-5" />
+            )}
           </Button>
 
           {/* Giỏ hàng */}
-          <Link href="/cart" aria-label="Giỏ hàng" onClick={closeMobile}>
+          <Link href="/cart" aria-label="Giỏ hàng">
             <Button
               variant="ghost"
               size="icon"
@@ -271,7 +567,7 @@ export function SiteHeader() {
             </Button>
           </Link>
 
-          {/* Thông báo — desktop only, only when logged in */}
+          {/* Thông báo — desktop only */}
           {authed && (
             <Button
               variant="ghost"
@@ -284,10 +580,10 @@ export function SiteHeader() {
             </Button>
           )}
 
-          {/* ───────── Tài khoản ───────── */}
+          {/* Tài khoản */}
           {!authed ? (
             <div className="ml-1 flex items-center gap-1.5 sm:gap-2">
-              {/* ── Mobile: dropdown menu ── */}
+              {/* xs: dropdown */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button
@@ -311,40 +607,27 @@ export function SiteHeader() {
                     asChild
                     className="cursor-pointer rounded-sm py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] focus:bg-[oklch(0.94_0.014_75)] focus:text-[oklch(0.6_0.062_60)]"
                   >
-                    <Link
-                      href="/login"
-                      onClick={closeMobile}
-                      className="flex items-center gap-3"
-                    >
+                    <Link href="/login" className="flex items-center gap-3">
                       <LogIn className="size-4 opacity-70" strokeWidth={1.4} />
                       Đăng nhập
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     asChild
-                    className="cursor-pointer rounded-sm py-2.5 text-[13px] font-medium text-[oklch(0.18_0.014_55)] focus:bg-[oklch(0.94_0.014_75)] focus:text-[oklch(0.6_0.062_60)]"
+                    className="cursor-pointer rounded-sm py-2.5 text-[13px] font-medium focus:bg-[oklch(0.94_0.014_75)] focus:text-[oklch(0.6_0.062_60)]"
                   >
-                    <Link
-                      href="/register"
-                      onClick={closeMobile}
-                      className="flex items-center gap-3"
-                    >
+                    <Link href="/register" className="flex items-center gap-3">
                       <UserPlus
                         className="size-4 text-[oklch(0.6_0.062_60)]"
                         strokeWidth={1.4}
                       />
-                      <span>Đăng ký</span>
+                      Đăng ký
                     </Link>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              {/* ── sm+: full pair as before ── */}
-              <Link
-                href="/login"
-                onClick={closeMobile}
-                className="hidden sm:block"
-              >
+              <Link href="/login" className="hidden sm:block">
                 <Button
                   variant="outline"
                   className="h-9 cursor-pointer rounded-full border border-[oklch(0.18_0.014_55)]! bg-transparent px-4 text-[11px] font-semibold tracking-[0.18em] text-[oklch(0.18_0.014_55)] uppercase transition-colors duration-200 hover:border-[oklch(0.6_0.062_60)]! hover:bg-transparent hover:text-[oklch(0.6_0.062_60)] md:px-5 md:text-[12px] md:tracking-[0.22em]"
@@ -352,15 +635,11 @@ export function SiteHeader() {
                   Đăng nhập
                 </Button>
               </Link>
-              <Link
-                href="/register"
-                onClick={closeMobile}
-                className="hidden sm:block"
-              >
+              <Link href="/register" className="hidden sm:block">
                 <Button className="group/reg ribbon-tan h-9 cursor-pointer rounded-full pr-3 pl-4 text-[11px] font-semibold tracking-[0.18em] uppercase md:pr-3.5 md:pl-5 md:text-[12px] md:tracking-[0.22em]">
-                  Đăng ký
+                  Đăng ký{" "}
                   <ArrowRight
-                    className="size-3.5 transition-transform duration-300 ease-out group-hover/reg:translate-x-0.5"
+                    className="size-3.5 transition-transform duration-300 group-hover/reg:translate-x-0.5"
                     strokeWidth={1.6}
                   />
                 </Button>
@@ -372,7 +651,6 @@ export function SiteHeader() {
                 type="button"
                 aria-haspopup="menu"
                 aria-expanded={accountOpen}
-                aria-label="Tài khoản của tôi"
                 onClick={() => setAccountOpen((v) => !v)}
                 className="cursor-pointer rounded-full focus-visible:ring-2 focus-visible:ring-[oklch(0.6_0.062_60/0.45)] focus-visible:outline-none"
               >
@@ -386,7 +664,6 @@ export function SiteHeader() {
                 </Avatar>
               </button>
 
-              {/* Dropdown */}
               <div
                 role="menu"
                 className={cn(
@@ -396,7 +673,6 @@ export function SiteHeader() {
                     : "invisible -translate-y-1 opacity-0"
                 )}
               >
-                {/* Profile head */}
                 <div className="flex items-center gap-3 border-b border-[oklch(0.9_0.014_72)] bg-[oklch(0.97_0.012_78)] px-4 py-3.5">
                   <Avatar className="size-11 ring-1 ring-[oklch(0.78_0.04_70)]">
                     {user?.avatar && (
@@ -427,55 +703,52 @@ export function SiteHeader() {
                     )}
                   </div>
                 </div>
-
-                {/* Menu items */}
                 <div className="p-1.5">
-                  <Link
-                    href="/account"
-                    onClick={() => setAccountOpen(false)}
-                    className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
-                  >
-                    <User className="size-4 opacity-70" strokeWidth={1.4} />
-                    Tài khoản của tôi
-                  </Link>
-                  <Link
-                    href="/account/orders"
-                    onClick={() => setAccountOpen(false)}
-                    className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
-                  >
-                    <Package className="size-4 opacity-70" strokeWidth={1.4} />
-                    Đơn thuê của tôi
-                  </Link>
-
-                  {user?.role === "admin" && (
-                    <Link
-                      href="/admin"
-                      onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
-                    >
-                      <LayoutDashboard
-                        className="size-4 opacity-70"
-                        strokeWidth={1.4}
-                      />
-                      Bảng điều khiển
-                    </Link>
-                  )}
-
-                  {user?.role === "supplier" && (
-                    <Link
-                      href="/supplier"
-                      onClick={() => setAccountOpen(false)}
-                      className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
-                    >
-                      <Store className="size-4 opacity-70" strokeWidth={1.4} />
-                      Cửa hàng của tôi
-                    </Link>
-                  )}
-
+                  {[
+                    {
+                      href: "/account",
+                      icon: User,
+                      label: "Tài khoản của tôi",
+                      show: true,
+                    },
+                    {
+                      href: "/account/orders",
+                      icon: Package,
+                      label: "Đơn thuê của tôi",
+                      show: true,
+                    },
+                    {
+                      href: "/admin",
+                      icon: LayoutDashboard,
+                      label: "Bảng điều khiển",
+                      show: user?.role === "admin",
+                    },
+                    {
+                      href: "/supplier",
+                      icon: Store,
+                      label: "Cửa hàng của tôi",
+                      show: user?.role === "supplier",
+                    },
+                  ]
+                    .filter((i) => i.show)
+                    .map((i) => (
+                      <Link
+                        key={i.href}
+                        href={i.href}
+                        onClick={() => setAccountOpen(false)}
+                        className="flex items-center gap-3 rounded-sm px-3 py-2.5 text-[13px] font-medium text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                      >
+                        <i.icon
+                          className="size-4 opacity-70"
+                          strokeWidth={1.4}
+                        />
+                        {i.label}
+                      </Link>
+                    ))}
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="mt-1 flex w-full cursor-pointer items-center gap-3 border-t border-[oklch(0.9_0.014_72)] px-3 pt-3 pb-2.5 text-[13px] font-medium text-[oklch(0.45_0.06_30)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.55_0.12_30)]"
+                    className="mt-1 flex w-full cursor-pointer items-center gap-3 border-t border-[oklch(0.9_0.014_72)] px-3 pt-3 pb-2.5 text-[13px] font-medium text-[oklch(0.45_0.06_30)] transition-colors hover:bg-[oklch(0.94_0.014_75)]"
                   >
                     <LogOut className="size-4 opacity-70" strokeWidth={1.4} />
                     Đăng xuất
@@ -486,203 +759,6 @@ export function SiteHeader() {
           )}
         </div>
       </nav>
-
-      {/* ─── Mobile drawer ─── */}
-      <div
-        className={cn(
-          "overflow-hidden border-t border-[oklch(0.86_0.018_70)]/70 bg-[oklch(0.99_0.008_78)] backdrop-blur-xl transition-[max-height,opacity] duration-300 ease-[cubic-bezier(0.22,1,0.36,1)] lg:hidden",
-          mobileOpen ? "max-h-[85vh] opacity-100" : "max-h-0 opacity-0"
-        )}
-      >
-        <div className="space-y-1 px-4 pt-3 pb-5">
-          {/* Mobile search */}
-          <div className="relative mb-3">
-            <Input
-              type="text"
-              placeholder="Tìm váy, croptop, Y2K..."
-              aria-label="Tìm sản phẩm"
-              className="w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-white px-5 py-2.5 pr-10 text-sm shadow-none"
-            />
-            <Search className="pointer-events-none absolute top-1/2 right-4 size-4 -translate-y-1/2 text-[oklch(0.5_0.024_60)]" />
-          </div>
-
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(pathname, item)
-            if (item.hasMenu) {
-              return (
-                <div key={item.label}>
-                  <button
-                    type="button"
-                    onClick={() => setMobileShopOpen((v) => !v)}
-                    aria-expanded={mobileShopOpen}
-                    className={cn(
-                      "flex w-full cursor-pointer items-center justify-between rounded-sm px-4 py-3 text-[14px] font-medium tracking-[0.04em] transition-colors duration-200",
-                      active
-                        ? "bg-[oklch(0.94_0.014_75)] text-[oklch(0.18_0.014_55)]"
-                        : "text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                    )}
-                  >
-                    <span>{item.label}</span>
-                    <ChevronDown
-                      className={cn(
-                        "size-4 opacity-70 transition-transform duration-200",
-                        mobileShopOpen && "rotate-180"
-                      )}
-                    />
-                  </button>
-                  <div
-                    className={cn(
-                      "overflow-hidden transition-[max-height,opacity] duration-300",
-                      mobileShopOpen
-                        ? "max-h-96 opacity-100"
-                        : "max-h-0 opacity-0"
-                    )}
-                  >
-                    <div className="mt-1 ml-2 space-y-0.5 border-l border-[oklch(0.86_0.018_70)] pl-3">
-                      {SHOP_CATEGORIES.map((cat) => (
-                        <Link
-                          key={cat.label}
-                          href={cat.href}
-                          onClick={closeMobile}
-                          className="flex items-center justify-between rounded-sm px-3 py-2 text-[13px] font-medium text-[oklch(0.4_0.024_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
-                        >
-                          <span>{cat.label}</span>
-                          {cat.tag && (
-                            <span className="rounded-sm bg-[oklch(0.6_0.062_60)] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.18em] text-white">
-                              {cat.tag}
-                            </span>
-                          )}
-                        </Link>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              )
-            }
-            return (
-              <Link
-                key={item.label}
-                href={item.href}
-                onClick={closeMobile}
-                aria-current={active ? "page" : undefined}
-                className={cn(
-                  "flex items-center rounded-sm px-4 py-3 text-[14px] font-medium tracking-[0.04em] transition-colors duration-200",
-                  active
-                    ? "bg-[oklch(0.94_0.014_75)] text-[oklch(0.18_0.014_55)]"
-                    : "text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                )}
-              >
-                {item.label}
-              </Link>
-            )
-          })}
-
-          {/* Auth block (mobile) */}
-          <div className="mt-4 border-t border-[oklch(0.9_0.014_72)] pt-4">
-            {!authed ? (
-              <div className="flex flex-col gap-2">
-                <Link href="/login" onClick={closeMobile}>
-                  <Button
-                    variant="outline"
-                    className="h-auto w-full cursor-pointer rounded-full border border-[oklch(0.34_0.03_55)] bg-transparent px-5 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase hover:bg-[oklch(0.18_0.014_55)] hover:text-[oklch(0.97_0.012_78)]"
-                  >
-                    <LogIn className="size-4" />
-                    Đăng nhập
-                  </Button>
-                </Link>
-                <Link href="/register" onClick={closeMobile}>
-                  <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[12px] font-semibold tracking-[0.22em] uppercase">
-                    <UserPlus className="size-4" />
-                    Đăng ký tài khoản
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <div className="flex items-center gap-3 px-2 pb-3">
-                  <Avatar className="size-11 ring-1 ring-[oklch(0.78_0.04_70)]">
-                    {user?.avatar && (
-                      <AvatarImage src={user.avatar} alt={user.name} />
-                    )}
-                    <AvatarFallback className="bg-[oklch(0.86_0.034_70)] text-[13px] font-semibold text-[oklch(0.34_0.03_55)]">
-                      {user ? getInitials(user.name) : "SL"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-display text-[15px] font-medium text-[oklch(0.18_0.014_55)]">
-                      {user?.name}
-                    </p>
-                    <p className="truncate text-[11px] text-[oklch(0.5_0.024_60)]">
-                      {user && ROLE_LABEL[user.role]}
-                    </p>
-                  </div>
-                </div>
-                <Link
-                  href="/account"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                >
-                  <User className="size-4 opacity-70" strokeWidth={1.4} />
-                  Tài khoản của tôi
-                </Link>
-                <Link
-                  href="/account/orders"
-                  onClick={closeMobile}
-                  className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                >
-                  <Package className="size-4 opacity-70" strokeWidth={1.4} />
-                  Đơn thuê của tôi
-                </Link>
-                {user?.role === "admin" && (
-                  <Link
-                    href="/admin"
-                    onClick={closeMobile}
-                    className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                  >
-                    <LayoutDashboard
-                      className="size-4 opacity-70"
-                      strokeWidth={1.4}
-                    />
-                    Bảng điều khiển
-                  </Link>
-                )}
-                {user?.role === "supplier" && (
-                  <Link
-                    href="/supplier"
-                    onClick={closeMobile}
-                    className="flex items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)]"
-                  >
-                    <Store className="size-4 opacity-70" strokeWidth={1.4} />
-                    Cửa hàng của tôi
-                  </Link>
-                )}
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="flex w-full cursor-pointer items-center gap-3 rounded-sm px-4 py-3 text-[14px] font-medium text-[oklch(0.45_0.06_30)] hover:bg-[oklch(0.94_0.014_75)]"
-                >
-                  <LogOut className="size-4 opacity-70" strokeWidth={1.4} />
-                  Đăng xuất
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* CTA — Cho thuê đồ (mobile) */}
-          {authed && (
-            <Link
-              href="/account/owner/new"
-              onClick={closeMobile}
-              className="mt-3 block"
-            >
-              <Button className="ribbon-tan h-auto w-full cursor-pointer rounded-full px-5 py-3 text-[13px] font-semibold tracking-[0.12em] uppercase">
-                <Plus className="size-4" />
-                Cho thuê đồ
-              </Button>
-            </Link>
-          )}
-        </div>
-      </div>
     </header>
   )
 }

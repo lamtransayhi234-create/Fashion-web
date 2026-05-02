@@ -208,7 +208,7 @@ export default function HomePage() {
           className="animate-drift-alt pointer-events-none absolute right-[8%] bottom-[10%] z-0 hidden size-64 rounded-full bg-[oklch(0.92_0.024_75/0.5)] blur-3xl lg:block"
           style={{ animationDelay: "-3s" }}
         />
-        <div className="mx-auto flex w-full items-center justify-between lg:max-w-[1200px] xl:max-w-[1535px]">
+        <div className="mx-auto flex w-full flex-col items-center justify-between lg:max-w-[1200px] lg:flex-row xl:max-w-[1535px]">
           <div className="relative z-10 flex w-full flex-col justify-center px-8 py-16 lg:w-1/2 lg:px-16 lg:py-20">
             {/* eyebrow group */}
             <div className="flex flex-col gap-3">
@@ -392,7 +392,7 @@ export default function HomePage() {
           className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,oklch(0.6_0.062_60/0.6),transparent)]"
         />
 
-        <div className="relative mx-auto grid lg:max-w-[1200px] xl:max-w-[1535px] grid-cols-1 items-center gap-12 px-8 py-24 lg:grid-cols-[1fr_1.2fr] lg:gap-20 lg:px-12 lg:py-32">
+        <div className="relative mx-auto grid grid-cols-1 items-center gap-12 px-8 py-24 lg:max-w-[1200px] lg:grid-cols-[1fr_1.2fr] lg:gap-20 lg:px-12 lg:py-32 xl:max-w-[1535px]">
           <div className="relative">
             <div className="relative overflow-hidden rounded-sm">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -503,7 +503,7 @@ export default function HomePage() {
           aria-hidden
           className="bg-halftone-tan pointer-events-none absolute inset-x-0 top-10 mx-auto h-[420px] max-w-5xl opacity-30"
         />
-        <div className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28">
+        <div className="relative mx-auto px-8 py-28 lg:max-w-[1200px] xl:max-w-[1535px]">
           <div className="mb-20 flex flex-col items-center gap-5 text-center">
             <div className="flex items-center gap-3">
               <span className="h-px w-10 bg-[oklch(0.6_0.062_60)]" />
@@ -572,7 +572,7 @@ export default function HomePage() {
           className="animate-drift-alt absolute right-[8%] -bottom-20 size-72 rounded-full bg-[oklch(0.92_0.024_75/0.4)] blur-3xl"
           style={{ animationDelay: "-4s" }}
         />
-        <div className="relative mx-auto mb-12 flex lg:max-w-[1200px] xl:max-w-[1535px] flex-col items-start justify-between gap-4 px-8 lg:flex-row lg:items-end lg:px-12">
+        <div className="relative mx-auto mb-12 flex flex-col items-start justify-between gap-4 px-8 lg:max-w-[1200px] lg:flex-row lg:items-end lg:px-12 xl:max-w-[1535px]">
           <div className="space-y-3">
             <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
               ✦ Bộ sưu tập ✦
@@ -592,7 +592,7 @@ export default function HomePage() {
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
           </a>
         </div>
-        <div className="relative no-scrollbar mx-auto flex gap-6 overflow-x-auto px-8 pb-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
+        <div className="relative mx-auto no-scrollbar flex gap-6 overflow-x-auto px-8 pb-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
           {CATEGORIES.map((category) => (
             <CategoryCard key={category.name} {...category} />
           ))}
@@ -611,7 +611,7 @@ export default function HomePage() {
       </section>
 
       {/* ─────────── HOT PRODUCTS ─────────── */}
-      <section className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28 lg:px-12">
+      <section className="relative mx-auto px-8 py-28 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
         <div
           aria-hidden
           className="pointer-events-none absolute top-20 right-6 -z-10 size-72 rounded-full bg-[oklch(0.91_0.026_70/0.35)] blur-3xl"
@@ -664,7 +664,7 @@ export default function HomePage() {
           className="bg-halftone-tan pointer-events-none absolute inset-0 opacity-50"
         />
 
-        <div className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 lg:px-12">
+        <div className="relative mx-auto px-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
           <div className="mb-16 space-y-4 text-center">
             <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
               ✦ Vì sao chọn chúng tôi ✦
@@ -727,7 +727,7 @@ export default function HomePage() {
       </section>
 
       {/* ─────────── TESTIMONIALS ─────────── */}
-      <section className="relative mx-auto lg:max-w-[1200px] xl:max-w-[1535px] px-8 py-28 lg:px-12">
+      <section className="relative mx-auto px-8 py-28 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
         <div className="mb-16 flex flex-col items-center gap-4 text-center">
           <p className="text-[11px] font-semibold tracking-[0.32em] text-[oklch(0.5_0.024_60)] uppercase">
             ✦ Diary entries ✦

@@ -376,4 +376,28 @@
   .animate-drift-alt { animation: drift-alt 13s ease-in-out infinite; }
   .animate-spin-slow { animation: spin-slow 22s linear infinite; }
   .animate-marquee { animation: marquee 32s linear infinite; }
+
+  /* Range slider thumb */
+  input[type="range"].slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: oklch(0.18 0.014 55);
+    border: 2px solid oklch(0.99 0.008 78);
+    box-shadow: 0 1px 6px oklch(0.18 0.014 55 / 0.4);
+    cursor: pointer;
+    transition: transform 0.15s ease;
+  }
+  input[type="range"].slider::-webkit-slider-thumb:hover {
+    transform: scale(1.15);
+  }
+  input[type="range"].slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: oklch(0.18 0.014 55);
+    border: 2px solid oklch(0.99 0.008 78);
+    cursor: pointer;
+  }
 }

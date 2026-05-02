@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState } from "react"
+import { useState, Suspense } from "react"
 import { Eye, EyeOff, Lock, Mail, Shield, Store, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -30,7 +30,7 @@ const DEMO_ACCOUNTS = [
   },
 ]
 
-export default function LoginPage() {
+function LoginInner() {
   const router = useRouter()
   const search = useSearchParams()
   const redirect = search?.get("redirect") || "/"
@@ -249,5 +249,13 @@ export default function LoginPage() {
         </div>
       </div>
     </section>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginInner />
+    </Suspense>
   )
 }
