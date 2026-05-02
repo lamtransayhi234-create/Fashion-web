@@ -72,7 +72,7 @@ const SHOP_CATEGORIES: { label: string; href: string; tag?: string }[] = [
   { label: "Đồ đi biển", href: "/shop?c=do-di-bien" },
   { label: "Y2K Style", href: "/shop?c=y2k", tag: "HOT" },
   { label: "Vintage 90s", href: "/shop?c=vintage" },
-  { label: "Xem tất cả danh mục", href: "/shop" },
+  { label: "Xem tất cả danh mục", href: "/products" },
 ]
 
 function isActive(pathname: string, item: NavItem): boolean {
