@@ -53,9 +53,12 @@ export default async function ProductDetailPage({
             className="size-3 text-[oklch(0.78_0.04_70)]"
             strokeWidth={1.4}
           />
-          <span className="text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.38_0.028_58)] uppercase">
+          <Link
+            href={"/products"}
+            className="text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.38_0.028_58)] uppercase"
+          >
             {product.category}
-          </span>
+          </Link>
           <ChevronRight
             className="size-3 text-[oklch(0.78_0.04_70)]"
             strokeWidth={1.4}

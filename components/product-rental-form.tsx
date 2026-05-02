@@ -96,7 +96,7 @@ export function ProductRentalForm({
       ? Math.max(0, differenceInCalendarDays(toDate, fromDate))
       : 0
   const total = nights * rentalPrice
-  const tooFewDays = nights > 0 && nights < MIN_RENTAL_DAYS
+  const tooFewDays = !!(fromDate && toDate && nights < MIN_RENTAL_DAYS)
   const canRent = isUser && isAvailable && selectedSize && nights >= MIN_RENTAL_DAYS
 
   function handleFromSelect(date: Date | undefined) {
