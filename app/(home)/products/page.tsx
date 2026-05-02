@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect, Suspense } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
+import Link from "next/link"
 import {
   ChevronDown,
   SlidersHorizontal,
@@ -1018,9 +1019,10 @@ function ProductsInner() {
                     const oos = product.status === "out_of_stock"
 
                     return (
-                      <article
+                      <Link
                         key={product.id}
-                        className="group h-full cursor-pointer"
+                        href={`/product/${product.id}`}
+                        className="group block h-full cursor-pointer"
                       >
                         <div
                           className="flex h-full flex-col overflow-hidden rounded-xl transition-all duration-500 hover:-translate-y-1"
@@ -1221,7 +1223,7 @@ function ProductsInner() {
                             </div>
                           </div>
                         </div>
-                      </article>
+                      </Link>
                     )
                   })}
                 </div>

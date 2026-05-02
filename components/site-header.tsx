@@ -61,7 +61,12 @@ type NavItem = {
 
 const NAV_ITEMS: NavItem[] = [
   { label: "Trang chủ", href: "/" },
-  { label: "Sản phẩm", href: "/shop", matchPrefix: "/shop", hasMenu: true },
+  {
+    label: "Sản phẩm",
+    href: "/products",
+    matchPrefix: "/products",
+    hasMenu: true,
+  },
   { label: "Tin tức", href: "/news", matchPrefix: "/news" },
   { label: "Giới thiệu", href: "/about", matchPrefix: "/about" },
 ]
@@ -71,12 +76,12 @@ function typeHref(type: string) {
 }
 
 const SHOP_CATEGORIES: { label: string; href: string }[] = [
-  { label: "Váy & Đầm",  href: typeHref("Váy & Đầm") },
-  { label: "Áo kiểu",   href: typeHref("Áo kiểu") },
-  { label: "Chân váy",  href: typeHref("Chân váy") },
-  { label: "Set",        href: typeHref("Set") },
-  { label: "Giày Dép",  href: typeHref("Giày Dép") },
-  { label: "Mũ & Nón",  href: typeHref("Mũ & Nón") },
+  { label: "Váy & Đầm", href: typeHref("Váy & Đầm") },
+  { label: "Áo kiểu", href: typeHref("Áo kiểu") },
+  { label: "Chân váy", href: typeHref("Chân váy") },
+  { label: "Set", href: typeHref("Set") },
+  { label: "Giày Dép", href: typeHref("Giày Dép") },
+  { label: "Mũ & Nón", href: typeHref("Mũ & Nón") },
   { label: "Trang sức", href: typeHref("Trang sức") },
   { label: "Xem tất cả sản phẩm", href: "/products" },
 ]
@@ -236,6 +241,7 @@ export function SiteHeader() {
             </SheetTrigger>
 
             <SheetContent
+              showCloseButton={false}
               side="left"
               className="w-[80vw] max-w-[320px] border-r border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
             >
