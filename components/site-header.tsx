@@ -66,13 +66,19 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Giới thiệu", href: "/about", matchPrefix: "/about" },
 ]
 
-const SHOP_CATEGORIES: { label: string; href: string; tag?: string }[] = [
-  { label: "Váy dự tiệc", href: "/shop?c=vay-du-tiec" },
-  { label: "Áo croptop", href: "/shop?c=ao-croptop" },
-  { label: "Đồ đi biển", href: "/shop?c=do-di-bien" },
-  { label: "Y2K Style", href: "/shop?c=y2k", tag: "HOT" },
-  { label: "Vintage 90s", href: "/shop?c=vintage" },
-  { label: "Xem tất cả danh mục", href: "/products" },
+function typeHref(type: string) {
+  return `/products?${new URLSearchParams({ type }).toString()}`
+}
+
+const SHOP_CATEGORIES: { label: string; href: string }[] = [
+  { label: "Váy & Đầm",  href: typeHref("Váy & Đầm") },
+  { label: "Áo kiểu",   href: typeHref("Áo kiểu") },
+  { label: "Chân váy",  href: typeHref("Chân váy") },
+  { label: "Set",        href: typeHref("Set") },
+  { label: "Giày Dép",  href: typeHref("Giày Dép") },
+  { label: "Mũ & Nón",  href: typeHref("Mũ & Nón") },
+  { label: "Trang sức", href: typeHref("Trang sức") },
+  { label: "Xem tất cả sản phẩm", href: "/products" },
 ]
 
 function isActive(pathname: string, item: NavItem): boolean {
@@ -288,14 +294,9 @@ export function SiteHeader() {
                               <SheetClose key={cat.label} asChild>
                                 <Link
                                   href={cat.href}
-                                  className="flex items-center justify-between rounded-md px-3 py-2 text-[13px] font-medium text-[oklch(0.4_0.024_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
+                                  className="flex items-center rounded-md px-3 py-2 text-[13px] font-medium text-[oklch(0.4_0.024_55)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
                                 >
-                                  <span>{cat.label}</span>
-                                  {cat.tag && (
-                                    <span className="rounded-sm bg-[oklch(0.6_0.062_60)] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.18em] text-white">
-                                      {cat.tag}
-                                    </span>
-                                  )}
+                                  {cat.label}
                                 </Link>
                               </SheetClose>
                             ))}
@@ -480,25 +481,20 @@ export function SiteHeader() {
                     <div className="invisible absolute top-full left-0 z-50 pt-3 opacity-0 transition-[opacity,transform] duration-200 group-hover/nav:visible group-hover/nav:translate-y-0 group-hover/nav:opacity-100">
                       <div className="w-60 overflow-hidden rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-2 shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.3)] backdrop-blur-xl">
                         <p className="px-3 pt-1.5 pb-2 text-[10px] font-semibold tracking-[0.22em] text-[oklch(0.55_0.024_60)] uppercase">
-                          Danh mục
+                          Loại đồ
                         </p>
                         {SHOP_CATEGORIES.map((cat, idx) => (
                           <Link
                             key={cat.label}
                             href={cat.href}
                             className={cn(
-                              "flex items-center justify-between rounded-sm px-3 py-2 text-[13px] font-medium transition-colors duration-200",
+                              "flex items-center rounded-sm px-3 py-2 text-[13px] font-medium transition-colors duration-200",
                               idx === SHOP_CATEGORIES.length - 1
                                 ? "mt-1 border-t border-[oklch(0.9_0.014_72)] pt-2.5 text-[oklch(0.6_0.062_60)] hover:bg-[oklch(0.94_0.014_75)]"
                                 : "text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.6_0.062_60)]"
                             )}
                           >
-                            <span>{cat.label}</span>
-                            {cat.tag && (
-                              <span className="rounded-sm bg-[oklch(0.6_0.062_60)] px-1.5 py-0.5 text-[9px] font-bold tracking-[0.18em] text-white">
-                                {cat.tag}
-                              </span>
-                            )}
+                            {cat.label}
                           </Link>
                         ))}
                       </div>
