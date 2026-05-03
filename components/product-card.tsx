@@ -1,11 +1,15 @@
+"use client"
+
 import { ArrowUpRight, Heart, MapPin, Sparkles, Star } from "lucide-react"
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/lib/store/auth-store"
+import type { Product } from "@/lib/data/products"
+import Link from "next/link"
 
 export type ProductCardProps = {
-  title: string
+  product: Product
   pricePerDay: string
   image: string
   imageAlt: string
@@ -22,7 +26,7 @@ export type ProductCardProps = {
 }
 
 export function ProductCard({
-  title,
+  product,
   pricePerDay,
   image,
   imageAlt,
@@ -30,9 +34,13 @@ export function ProductCard({
   rating,
   availability,
 }: ProductCardProps) {
+  const { user, isAuthenticated, toggleWhitelist } = useAuthStore()
+  const isCustomer = isAuthenticated && user?.role === "user"
+  const isWishlisted = user?.whitelist.some((w) => w.id === product.id) ?? false
+
   return (
     <div className="group relative">
-      <div className="relative overflow-hidden rounded-md bg-[oklch(0.99_0.008_78)] ring-1 ring-[oklch(0.88_0.018_70)] shadow-[0_18px_40px_-22px_oklch(0.34_0.03_55/0.35)] transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_28px_60px_-22px_oklch(0.34_0.03_55/0.45)]">
+      <div className="relative overflow-hidden rounded-md bg-[oklch(0.99_0.008_78)] shadow-[0_18px_40px_-22px_oklch(0.34_0.03_55/0.35)] ring-1 ring-[oklch(0.88_0.018_70)] transition-all duration-500 group-hover:-translate-y-1 group-hover:shadow-[0_28px_60px_-22px_oklch(0.34_0.03_55/0.45)]">
         <div className="relative h-80 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
@@ -44,40 +52,57 @@ export function ProductCard({
             aria-hidden
             className="absolute inset-0 bg-[oklch(0.18_0.014_55/0.28)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           />
-          <button
-            type="button"
-            aria-label="Lưu vào yêu thích"
-            className="group/heart absolute top-4 right-4 z-10 flex size-10 items-center justify-center rounded-full bg-[oklch(0.99_0.008_78)]/90 text-[oklch(0.34_0.03_55)] shadow-[0_8px_18px_-8px_oklch(0.34_0.03_55/0.4)] backdrop-blur-md transition-all hover:scale-110 hover:text-[oklch(0.6_0.062_60)]"
-          >
-            <Heart className="size-4 transition-all group-hover/heart:fill-[oklch(0.6_0.062_60)]" />
-          </button>
+
+          {isCustomer && (
+            <button
+              type="button"
+              aria-label={isWishlisted ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
+              onClick={() => toggleWhitelist(product)}
+              className="absolute top-4 right-4 z-10 flex size-10 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 hover:scale-110"
+              style={{
+                background: isWishlisted
+                  ? "oklch(0.6 0.062 60)"
+                  : "oklch(0.99 0.008 78 / 0.90)",
+                boxShadow: "0 8px 18px -8px oklch(0.34 0.03 55 / 0.4)",
+              }}
+            >
+              <Heart
+                className="size-4 transition-all duration-200"
+                style={{
+                  stroke: isWishlisted ? "oklch(0.97 0.012 78)" : "oklch(0.34 0.03 55)",
+                  fill: isWishlisted ? "oklch(0.97 0.012 78)" : "transparent",
+                }}
+                strokeWidth={1.8}
+              />
+            </button>
+          )}
 
           <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 rounded-sm bg-[oklch(0.99_0.008_78)]/95 px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-[oklch(0.34_0.03_55)] uppercase backdrop-blur-md">
             <Sparkles className="size-3 fill-[oklch(0.78_0.04_70)] stroke-[oklch(0.6_0.062_60)]" />
             hot pick
           </div>
 
-          <div className="absolute bottom-4 left-4 z-10 ribbon-tan rounded-full px-4 py-1.5 text-[12px] font-semibold tracking-[0.04em]">
+          <div className="ribbon-tan absolute bottom-4 left-4 z-10 rounded-full px-4 py-1.5 text-[12px] font-semibold tracking-[0.04em]">
             {pricePerDay}
           </div>
 
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <button
-              type="button"
+            <Link
+              href={`/product/${product.id}`}
               className="group/cta pointer-events-auto flex translate-y-1 items-center gap-3 rounded-full bg-[oklch(0.97_0.012_78)]/95 py-3 pr-3 pl-6 text-[11px] font-semibold tracking-[0.28em] text-[oklch(0.18_0.014_55)] uppercase opacity-0 shadow-[0_22px_50px_-16px_oklch(0.18_0.014_55/0.6)] ring-1 ring-[oklch(0.97_0.012_78)]/40 backdrop-blur-md transition-all duration-500 ease-out group-hover:translate-y-0 group-hover:opacity-100 hover:bg-[oklch(0.18_0.014_55)] hover:text-[oklch(0.97_0.012_78)] hover:ring-[oklch(0.18_0.014_55)]"
             >
               <span>Thuê ngay</span>
               <span className="flex size-7 items-center justify-center rounded-full bg-[oklch(0.6_0.062_60)] text-[oklch(0.97_0.012_78)] transition-transform duration-300 group-hover/cta:rotate-45">
                 <ArrowUpRight className="size-3.5" strokeWidth={1.8} />
               </span>
-            </button>
+            </Link>
           </div>
         </div>
 
         <div className="p-5">
           <div className="space-y-3">
-            <h3 className="font-display truncate text-[17px] leading-tight font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
-              {title}
+            <h3 className="truncate font-display text-[17px] leading-tight font-medium tracking-tight text-[oklch(0.18_0.014_55)]">
+              {product.name}
             </h3>
 
             <div className="flex items-center gap-2 text-sm text-[oklch(0.5_0.024_60)]">
@@ -113,7 +138,6 @@ export function ProductCard({
               </span>
             </div>
           </div>
-
         </div>
       </div>
     </div>

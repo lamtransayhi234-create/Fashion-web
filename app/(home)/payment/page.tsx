@@ -14,6 +14,7 @@ import {
   MapPin,
   MessageSquare,
   Palette,
+  Phone,
   RotateCcw,
   ShieldCheck,
   X,
@@ -54,6 +55,7 @@ export default function PaymentPage() {
   const { user, addOrder } = useAuthStore()
 
   const [address, setAddress] = useState("")
+  const [phone, setPhone] = useState("")
   const [paymentMethod, setPaymentMethod] = useState<"bank" | "momo" | null>(
     null
   )
@@ -107,6 +109,7 @@ export default function PaymentPage() {
 
   const isComplete =
     address.trim().length > 0 &&
+    phone.trim().length > 0 &&
     paymentMethod !== null &&
     note.trim().length > 0
 
@@ -120,6 +123,7 @@ export default function PaymentPage() {
     // Save order to auth store
     addOrder({
       productId: pending.productId,
+      providerId: pending.providerId,
       productName: pending.productName,
       productSrc: pending.productSrc,
       productType: pending.productType,
@@ -132,10 +136,11 @@ export default function PaymentPage() {
       total: pending.total,
       deposit,
       address,
+      phone: phone.trim(),
       paymentMethod,
       paymentMethodLabel: selectedMethod.label,
       note,
-      status: "confirmed",
+      status: "pending",
     })
     clear()
     setShowQR(false)
@@ -268,6 +273,24 @@ export default function PaymentPage() {
                 />
               </FormField>
 
+              {/* Số điện thoại */}
+              <FormField
+                icon={Phone}
+                label="Số điện thoại nhận hàng"
+                filled={phone.trim().length > 0}
+              >
+                <input
+                  type="tel"
+                  value={phone}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9+\s\-()]/g, "")
+                    setPhone(val)
+                  }}
+                  placeholder="Ví dụ: 0901 234 567"
+                  className="w-full rounded-sm bg-[oklch(0.94_0.014_75)] px-4 py-3 text-[14px] font-medium text-[oklch(0.18_0.014_55)] ring-1 ring-[oklch(0.88_0.018_70)] transition-all outline-none placeholder:text-[oklch(0.62_0.03_60)] focus:ring-[oklch(0.6_0.062_60)]"
+                />
+              </FormField>
+
               {/* Thanh toán */}
               <FormField
                 icon={CreditCard}
@@ -378,6 +401,12 @@ export default function PaymentPage() {
                     label="Địa chỉ giao"
                     value={address.trim().length > 0 ? address : null}
                     placeholder="Chưa nhập địa chỉ"
+                  />
+                  <SidebarRow
+                    icon={Phone}
+                    label="Số điện thoại"
+                    value={phone.trim().length > 0 ? phone : null}
+                    placeholder="Chưa nhập SĐT"
                   />
                   <SidebarRow
                     icon={CreditCard}

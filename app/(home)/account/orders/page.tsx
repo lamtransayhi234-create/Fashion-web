@@ -1,6 +1,6 @@
 "use client"
 
-import { useSyncExternalStore } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { parseISO, isAfter, isBefore, isEqual, format } from "date-fns"
@@ -11,6 +11,7 @@ import {
   MapPin,
   Package,
   Palette,
+  Phone,
   RotateCcw,
   ShoppingBag,
 } from "lucide-react"
@@ -104,6 +105,8 @@ export default function OrdersPage() {
     () => false
   )
 
+  const [filter, setFilter] = useState<RentalStatus | "all">("all")
+
   if (!hydrated) return null
 
   if (!isAuthenticated || !user) {
@@ -113,6 +116,24 @@ export default function OrdersPage() {
 
   const orders = user.orders ?? []
   const activeCount = orders.filter((o) => getRentalStatus(o) === "active").length
+
+  const FILTER_TABS: { key: RentalStatus | "all"; label: string }[] = [
+    { key: "all",       label: "Tất cả"        },
+    { key: "pending",   label: "Chờ xác nhận"  },
+    { key: "upcoming",  label: "Chờ nhận đồ"   },
+    { key: "active",    label: "Đang thuê"      },
+    { key: "overdue",   label: "Quá hạn"        },
+    { key: "completed", label: "Hoàn thành"     },
+    { key: "cancelled", label: "Đã hủy"         },
+  ]
+
+  const visibleTabs = FILTER_TABS.filter((t) =>
+    t.key === "all" || orders.some((o) => getRentalStatus(o) === t.key)
+  )
+
+  const filteredOrders = filter === "all"
+    ? orders
+    : orders.filter((o) => getRentalStatus(o) === filter)
 
   return (
     <div className="min-h-screen bg-[oklch(0.962_0.012_78)]">
@@ -167,6 +188,53 @@ export default function OrdersPage() {
           </Link>
         </div>
 
+        {/* Filter tabs */}
+        {orders.length > 0 && (
+          <div className="mb-8 flex flex-wrap gap-2">
+            {visibleTabs.map((t) => {
+              const active = filter === t.key
+              const count = t.key === "all"
+                ? orders.length
+                : orders.filter((o) => getRentalStatus(o) === t.key).length
+
+              const ACTIVE_COLORS: Record<RentalStatus | "all", { bg: string; color: string }> = {
+                all:       { bg: "oklch(0.90 0.05 68)",   color: "oklch(0.42 0.07 60)"  },
+                pending:   { bg: "oklch(0.97 0.03 80)",   color: "oklch(0.42 0.1 80)"   },
+                upcoming:  { bg: "oklch(0.95 0.03 240)",  color: "oklch(0.38 0.1 240)"  },
+                active:    { bg: "oklch(0.95 0.04 145)",  color: "oklch(0.35 0.1 145)"  },
+                overdue:   { bg: "oklch(0.96 0.04 30)",   color: "oklch(0.42 0.14 30)"  },
+                completed: { bg: "oklch(0.94 0.014 75)",  color: "oklch(0.42 0.022 58)" },
+                cancelled: { bg: "oklch(0.94 0.014 75)",  color: "oklch(0.42 0.022 58)" },
+              }
+
+              const activeCfg = ACTIVE_COLORS[t.key]
+              const bg    = active ? activeCfg.bg    : "oklch(0.96 0.008 78)"
+              const color = active ? activeCfg.color : "oklch(0.55 0.024 60)"
+              const border = active ? activeCfg.color : "oklch(0.88 0.018 70)"
+
+              return (
+                <button
+                  key={t.key}
+                  type="button"
+                  onClick={() => setFilter(t.key)}
+                  className="flex cursor-pointer items-center gap-1.5 rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-[0.1em] uppercase transition-all"
+                  style={{ background: bg, color, border: `1.5px solid ${border}` }}
+                >
+                  {t.label}
+                  {count > 0 && (
+                    <span
+                      className="flex size-4 items-center justify-center rounded-full text-[9px] font-bold"
+                      style={{ background: "oklch(0 0 0 / 0.12)" }}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        )}
+
         {/* Empty state */}
         {orders.length === 0 && (
           <div className="flex flex-col items-center gap-6 py-24 text-center">
@@ -189,37 +257,49 @@ export default function OrdersPage() {
           </div>
         )}
 
-        {/* Order list */}
-        {orders.length > 0 && (
-          <div className="space-y-5">
-            {orders.map((order) => {
+        {/* Filter empty state */}
+        {orders.length > 0 && filteredOrders.length === 0 && (
+          <div className="flex flex-col items-center gap-3 py-16 text-center">
+            <p className="font-display text-[20px] font-medium text-[oklch(0.18_0.014_55)]">
+              Không có đơn nào
+            </p>
+            <p className="text-[13px] text-[oklch(0.52_0.03_58)]">
+              Không có đơn nào trong trạng thái này
+            </p>
+          </div>
+        )}
+
+        {/* Order grid */}
+        {filteredOrders.length > 0 && (
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+            {filteredOrders.map((order) => {
               const rentalStatus = getRentalStatus(order)
               const cfg = RENTAL_STATUS_CONFIG[rentalStatus]
               const from = parseISO(order.fromDate)
               const to = parseISO(order.toDate)
 
               return (
-                <article
+                <div
                   key={order.id}
-                  className="soft-shadow overflow-hidden rounded-md bg-[oklch(0.99_0.008_78)] ring-1 ring-[oklch(0.88_0.018_70)]"
+                  className="group flex flex-col overflow-hidden rounded-md transition-all duration-300 hover:-translate-y-0.5"
+                  style={{
+                    background: "oklch(0.99 0.008 78)",
+                    border: "1px solid oklch(0.88 0.018 70)",
+                    boxShadow: "0 4px 16px -8px oklch(0.34 0.03 55 / 0.12)",
+                  }}
                 >
-                  {/* Card header — order meta */}
-                  <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[oklch(0.9_0.014_72)] bg-[oklch(0.97_0.01_76)] px-5 py-3">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[10px] font-semibold tracking-[0.2em] text-[oklch(0.52_0.03_58)] uppercase">
-                        Mã đơn
-                      </span>
-                      <span className="font-display text-[13px] font-semibold text-[oklch(0.18_0.014_55)]">
-                        #{order.id}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] text-[oklch(0.58_0.03_58)]">
-                        {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
-                      </span>
-                      {/* Rental status label */}
+                  {/* Ảnh */}
+                  <div className="relative aspect-[3/4] overflow-hidden bg-[oklch(0.94_0.014_75)]">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={order.productSrc}
+                      alt={order.productName}
+                      className="size-full object-cover grayscale-[0.05] transition-transform duration-500 group-hover:scale-[1.04]"
+                    />
+                    {/* Status badge */}
+                    <div className="absolute top-2 left-2">
                       <span
-                        className={`flex items-center gap-1.5 rounded-full border px-3 py-1 text-[10px] font-semibold tracking-[0.14em] uppercase ${cfg.bg} ${cfg.text} ${cfg.border}`}
+                        className={`flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-[0.08em] uppercase backdrop-blur-sm ${cfg.bg} ${cfg.text}`}
                       >
                         <span className={`size-1.5 rounded-full ${cfg.dot} ${rentalStatus === "active" ? "animate-pulse" : ""}`} />
                         {cfg.label}
@@ -227,101 +307,60 @@ export default function OrdersPage() {
                     </div>
                   </div>
 
-                  {/* Card body */}
-                  <div className="flex flex-col gap-5 p-5 sm:flex-row">
-                    {/* Product image */}
-                    <div className="h-36 w-28 shrink-0 overflow-hidden rounded-sm bg-[oklch(0.94_0.014_75)]">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={order.productSrc}
-                        alt={order.productName}
-                        className="h-full w-full object-cover grayscale-[0.06]"
-                      />
-                    </div>
-
-                    {/* Product info */}
-                    <div className="flex flex-1 flex-col gap-4">
-                      <div>
-                        <div className="mb-0.5 text-[10px] font-semibold tracking-[0.2em] text-[oklch(0.52_0.03_58)] uppercase">
-                          {order.productType}
-                        </div>
-                        <h3 className="font-display text-[20px] leading-tight font-medium text-[oklch(0.18_0.014_55)]">
-                          {order.productName}
-                        </h3>
-                        <div className="mt-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-sm bg-[oklch(0.91_0.022_75)] px-2.5 py-1 text-[11px] font-semibold tracking-wider text-[oklch(0.28_0.022_55)] uppercase">
-                            Size {order.size}
-                          </span>
-                          <span className="flex items-center gap-1.5 text-[12px] text-[oklch(0.42_0.025_58)]">
-                            <Palette className="size-3.5" strokeWidth={1.4} />
-                            {order.color}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Date + address row */}
-                      <div className="grid gap-2 sm:grid-cols-2">
-                        <div className="flex items-start gap-2 text-[12px] text-[oklch(0.42_0.025_58)]">
-                          <CalendarRange
-                            className="mt-0.5 size-3.5 shrink-0 text-[oklch(0.6_0.062_60)]"
-                            strokeWidth={1.4}
-                          />
-                          <span>
-                            {format(from, "dd/MM/yyyy")} →{" "}
-                            {format(to, "dd/MM/yyyy")}
-                            <span className="ml-1 font-semibold text-[oklch(0.28_0.022_55)]">
-                              · {order.nights} ngày
-                            </span>
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-2 text-[12px] text-[oklch(0.42_0.025_58)]">
-                          <MapPin
-                            className="mt-0.5 size-3.5 shrink-0 text-[oklch(0.6_0.062_60)]"
-                            strokeWidth={1.4}
-                          />
-                          <span className="line-clamp-2">{order.address}</span>
-                        </div>
-                      </div>
-
-                      {/* Payment + note */}
-                      <div className="flex flex-wrap items-center gap-3 text-[11px] text-[oklch(0.52_0.03_58)]">
-                        <span className="flex items-center gap-1.5 rounded-sm bg-[oklch(0.94_0.014_75)] px-2.5 py-1">
-                          <Clock className="size-3" strokeWidth={1.4} />
-                          {order.paymentMethodLabel}
+                  {/* Info */}
+                  <div className="flex flex-1 flex-col justify-between p-3">
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] font-semibold tracking-[0.18em] uppercase text-[oklch(0.52_0.03_58)]">
+                        {order.productType}
+                      </p>
+                      <h3 className="line-clamp-2 font-display text-[13px] font-medium leading-snug text-[oklch(0.18_0.014_55)]">
+                        {order.productName}
+                      </h3>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="rounded-sm bg-[oklch(0.91_0.022_75)] px-1.5 py-0.5 text-[10px] font-semibold text-[oklch(0.28_0.022_55)] uppercase">
+                          {order.size}
                         </span>
-                        {order.note && (
-                          <span className="italic">
-                            &ldquo;{order.note.slice(0, 60)}{order.note.length > 60 ? "…" : ""}&rdquo;
-                          </span>
-                        )}
+                        <span className="flex items-center gap-1 text-[11px] text-[oklch(0.52_0.03_58)]">
+                          <Palette className="size-3" strokeWidth={1.4} />
+                          {order.color}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-[11px] text-[oklch(0.52_0.03_58)]">
+                        <CalendarRange className="size-3 shrink-0 text-[oklch(0.6_0.062_60)]" strokeWidth={1.4} />
+                        <span>
+                          {format(from, "dd/MM")} → {format(to, "dd/MM")}
+                          <span className="ml-1 font-semibold text-[oklch(0.28_0.022_55)]">· {order.nights}n</span>
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-1 text-[11px] text-[oklch(0.52_0.03_58)]">
+                        <MapPin className="mt-0.5 size-3 shrink-0 text-[oklch(0.6_0.062_60)]" strokeWidth={1.4} />
+                        <span className="line-clamp-1">{order.address}</span>
+                      </div>
+                      {order.phone && (
+                        <div className="flex items-center gap-1 text-[11px] text-[oklch(0.52_0.03_58)]">
+                          <Phone className="size-3 shrink-0 text-[oklch(0.6_0.062_60)]" strokeWidth={1.4} />
+                          <span>{order.phone}</span>
+                        </div>
+                      )}
+
+                      <div className="font-display text-[14px] font-semibold text-[oklch(0.18_0.014_55)]">
+                        {order.total.toLocaleString("vi-VN")}đ
+                        <span className="ml-1 font-display text-[11px] font-normal text-[oklch(0.52_0.03_58)]">
+                          · cọc {order.deposit.toLocaleString("vi-VN")}đ
+                        </span>
                       </div>
                     </div>
 
-                    {/* Price block */}
-                    <div className="flex shrink-0 flex-col items-end justify-between gap-4 sm:w-40">
-                      <div className="text-right">
-                        <div className="text-[10px] font-semibold tracking-[0.2em] text-[oklch(0.52_0.03_58)] uppercase">
-                          Tiền thuê
-                        </div>
-                        <div className="font-display text-[22px] font-semibold text-[oklch(0.18_0.014_55)]">
-                          {order.total.toLocaleString("vi-VN")}
-                          <span className="ml-0.5 text-[14px] font-normal text-[oklch(0.52_0.03_58)]">đ</span>
-                        </div>
-                        <div className="mt-1 flex items-center justify-end gap-1 text-[11px] text-[oklch(0.52_0.03_58)]">
-                          <RotateCcw className="size-3" strokeWidth={1.4} />
-                          Cọc {order.deposit.toLocaleString("vi-VN")}đ
-                        </div>
-                      </div>
-
-                      <Link
-                        href={`/product/${order.productId}`}
-                        className="text-[11px] font-semibold tracking-wider text-[oklch(0.52_0.03_58)] uppercase underline-offset-2 transition-colors hover:text-[oklch(0.6_0.062_60)] hover:underline"
-                      >
-                        Xem sản phẩm →
-                      </Link>
-                    </div>
+                    <Link
+                      href={`/product/${order.productId}`}
+                      className="mt-3 text-[10px] font-semibold tracking-[0.14em] uppercase text-[oklch(0.52_0.03_58)] underline-offset-2 transition-colors hover:text-[oklch(0.6_0.062_60)] hover:underline"
+                    >
+                      Xem sản phẩm →
+                    </Link>
                   </div>
-                </article>
+                </div>
               )
             })}
           </div>

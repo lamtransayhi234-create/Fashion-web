@@ -1,10 +1,15 @@
+"use client"
+
 import { notFound } from "next/navigation"
+import { useParams } from "next/navigation"
+import { useSyncExternalStore } from "react"
 import Link from "next/link"
 import {
   ChevronRight,
   MapPin,
   Package,
   Palette,
+  Phone,
   RotateCcw,
   ShieldCheck,
   Sparkles,
@@ -13,28 +18,41 @@ import {
   Truck,
 } from "lucide-react"
 
-import { products, providers } from "@/lib/data/products"
+import { providers } from "@/lib/data/products"
+import { useProductStore } from "@/lib/store/product-store"
+import { useAuthStore } from "@/lib/store/auth-store"
 import { ProductImageZoom } from "@/components/product-image-zoom"
 import { ProductRentalForm } from "@/components/product-rental-form"
 import { ProductCard } from "@/components/product-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
-export default async function ProductDetailPage({
-  params,
-}: {
-  params: Promise<{ id: string }>
-}) {
-  const { id } = await params
-  const product = products.find((p) => p.id === id)
-  if (!product) notFound()
+export default function ProductDetailPage() {
+  const params = useParams()
+  const id = params?.id as string
+  const allProducts = useProductStore((s) => s.allProducts)
+  const dynamicProviders = useProductStore((s) => s.dynamicProviders)
+  const users = useAuthStore((s) => s.users)
+  const hydrated = useSyncExternalStore(
+    (cb) => useProductStore.persist.onFinishHydration(cb),
+    () => useProductStore.persist.hasHydrated(),
+    () => false
+  )
 
-  const provider = providers.find((p) => p.id === product.providerId)!
+  if (!hydrated) return <div className="min-h-screen bg-[oklch(0.962_0.012_78)]" />
+
+  const product = allProducts.find((p) => p.id === id)
+  if (!product) return notFound()
+
+  const allProviders = [...providers, ...dynamicProviders]
+  const provider = allProviders.find((p) => p.id === product.providerId)
+  const supplierUser = users.find((u) => u.id === product.providerId)
+  const supplierPhone = supplierUser?.phone
   const isAvailable = product.status === "available"
   const savingPct = Math.round(
     (1 - product.rentalPrice / product.brandPrice) * 100
   )
 
-  const similar = products
+  const similar = allProducts
     .filter((p) => p.type === product.type && p.id !== product.id)
     .slice(0, 4)
 
@@ -210,6 +228,7 @@ export default async function ProductDetailPage({
               isAvailable={isAvailable}
               rentalPrice={product.rentalPrice}
               productId={product.id}
+              providerId={product.providerId}
               productName={product.name}
               productSrc={product.src}
               productType={product.type}
@@ -266,14 +285,24 @@ export default async function ProductDetailPage({
                   Người cho thuê
                 </div>
                 <div className="font-display text-[18px] font-medium text-[oklch(0.18_0.014_55)]">
-                  {provider.shopName}
+                  {provider?.shopName ?? "Nhà cung cấp"}
                 </div>
                 <div className="mt-1 flex items-center gap-1.5 text-[12px] text-[oklch(0.38_0.028_58)]">
-                  <span>{provider.handle}</span>
-                  <span className="text-[oklch(0.78_0.04_70)]">·</span>
-                  <MapPin className="size-3" strokeWidth={1.4} />
-                  <span>{provider.location}</span>
+                  <span>{provider?.handle ?? ""}</span>
+                  {provider?.location && (
+                    <>
+                      <span className="text-[oklch(0.78_0.04_70)]">·</span>
+                      <MapPin className="size-3" strokeWidth={1.4} />
+                      <span>{provider.location}</span>
+                    </>
+                  )}
                 </div>
+                {supplierPhone && (
+                  <div className="mt-1 flex items-center gap-1.5 text-[12px] text-[oklch(0.38_0.028_58)]">
+                    <Phone className="size-3" strokeWidth={1.4} />
+                    <span>{supplierPhone}</span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-1 rounded-sm bg-[oklch(0.94_0.014_75)] px-2.5 py-1.5 text-[11px] font-semibold text-[oklch(0.22_0.02_55)]">
@@ -305,26 +334,25 @@ export default async function ProductDetailPage({
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {similar.map((p) => {
-                const prov = providers.find((v) => v.id === p.providerId)!
+                const prov = allProviders.find((v) => v.id === p.providerId)
                 return (
-                  <Link key={p.id} href={`/product/${p.id}`} className="block">
-                    <ProductCard
-                      title={p.name}
-                      pricePerDay={`${p.rentalPrice.toLocaleString("vi-VN")}đ / ngày`}
-                      image={p.src}
-                      imageAlt={p.name}
-                      owner={{
-                        handle: prov.handle,
-                        avatar: prov.avatar,
-                        location: prov.location,
-                      }}
-                      rating={p.rating}
-                      availability={{
-                        label: p.status === "available" ? "Sẵn có" : "Hết hàng",
-                        tone: p.status === "available" ? "success" : "danger",
-                      }}
-                    />
-                  </Link>
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    pricePerDay={`${p.rentalPrice.toLocaleString("vi-VN")}đ / ngày`}
+                    image={p.src}
+                    imageAlt={p.name}
+                    owner={{
+                      handle: prov?.handle ?? "",
+                      avatar: prov?.avatar ?? "",
+                      location: prov?.location ?? "",
+                    }}
+                    rating={p.rating}
+                    availability={{
+                      label: p.status === "available" ? "Sẵn có" : "Hết hàng",
+                      tone: p.status === "available" ? "success" : "danger",
+                    }}
+                  />
                 )
               })}
             </div>

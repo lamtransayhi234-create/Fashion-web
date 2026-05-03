@@ -49,6 +49,7 @@ type Props = {
   rentalPrice: number
   // needed for order store
   productId: string
+  providerId: string
   productName: string
   productSrc: string
   productType: string
@@ -61,6 +62,7 @@ export function ProductRentalForm({
   isAvailable,
   rentalPrice,
   productId,
+  providerId,
   productName,
   productSrc,
   productType,
@@ -348,6 +350,7 @@ export function ProductRentalForm({
                 if (!canRent || !selectedSize || !fromDate || !toDate) return
                 setPending({
                   productId,
+                  providerId,
                   productName,
                   productSrc,
                   productType,

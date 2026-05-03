@@ -16,15 +16,18 @@ import {
   Wallet,
   Tag,
   CheckCircle2,
+  Heart,
 } from "lucide-react"
 
 import {
-  products,
   providers,
+  type Product,
   type ProductCategory,
   type ProductType,
 } from "@/lib/data/products"
 import { cn } from "@/lib/utils"
+import { useAuthStore } from "@/lib/store/auth-store"
+import { useProductStore } from "@/lib/store/product-store"
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -289,12 +292,14 @@ function SidebarPanel({
   onChange,
   onApply,
   onReset,
+  allProducts,
 }: {
   pending: Filters
   applied: Filters
   onChange: (f: Filters) => void
   onApply: () => void
   onReset: () => void
+  allProducts: Product[]
 }) {
   function toggle(key: keyof Filters, val: string) {
     const arr = pending[key] as string[]
@@ -374,7 +379,7 @@ function SidebarPanel({
             on={pending.types.includes(type)}
             onClick={() => toggle("types", type)}
             label={type}
-            count={products.filter((p) => p.type === type).length}
+            count={allProducts.filter((p) => p.type === type).length}
           />
         ))}
       </SideSection>
@@ -545,6 +550,7 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function ProductsInner() {
+  const allProducts = useProductStore((s) => s.allProducts)
   const searchParams = useSearchParams()
   const router = useRouter()
   const keyword = searchParams.get("keyword")?.trim() ?? ""
@@ -559,6 +565,9 @@ function ProductsInner() {
     ...EMPTY,
     types: typeParam ? [typeParam] : [],
   })
+
+  const { user, isAuthenticated, toggleWhitelist } = useAuthStore()
+  const isCustomer = isAuthenticated && user?.role === "user"
 
   const [pending, setPending] = useState<Filters>(initFilters)
   const [applied, setApplied] = useState<Filters>(initFilters)
@@ -600,7 +609,7 @@ function ProductsInner() {
 
   // Filter products using `applied` + keyword from URL
   const filtered = useMemo(() => {
-    let r = [...products]
+    let r = [...allProducts]
     // keyword search — split thành từng từ, product phải match ÍT NHẤT 1 từ
     if (keyword) {
       const words = keyword.toLowerCase().split(/\s+/).filter(Boolean)
@@ -746,12 +755,12 @@ function ProductsInner() {
               className="text-[13px]"
               style={{ color: "oklch(0.72 0.018 70)" }}
             >
-              {products.length} sản phẩm · Thuê từ cộng đồng chủ tủ trên cả nước
+              {allProducts.length} sản phẩm · Thuê từ cộng đồng chủ tủ trên cả nước
             </p>
           </div>
           <div className="hidden grid-cols-3 gap-12 text-right lg:grid">
             {[
-              { n: `${products.length}+`, label: "Sản phẩm" },
+              { n: `${allProducts.length}+`, label: "Sản phẩm" },
               { n: `${providers.length}`, label: "Chủ tủ" },
               { n: "24h", label: "Giao hàng" },
             ].map((s) => (
@@ -828,8 +837,8 @@ function ProductsInner() {
           {CATEGORIES.map((cat) => {
             const cnt =
               cat.value === "all"
-                ? products.length
-                : products.filter((p) => p.category === cat.value).length
+                ? allProducts.length
+                : allProducts.filter((p) => p.category === cat.value).length
             const active = applied.category === cat.value
             return (
               <button
@@ -914,6 +923,7 @@ function ProductsInner() {
                   onChange={setPending}
                   onApply={applyFilters}
                   onReset={resetAll}
+                  allProducts={allProducts}
                 />
               </div>
             </div>
@@ -1018,12 +1028,11 @@ function ProductsInner() {
                     )
                     const oos = product.status === "out_of_stock"
 
+                    const isWishlisted =
+                      user?.whitelist.some((w) => w.id === product.id) ?? false
+
                     return (
-                      <Link
-                        key={product.id}
-                        href={`/product/${product.id}`}
-                        className="group block h-full cursor-pointer"
-                      >
+                      <div key={product.id} className="group block h-full">
                         <div
                           className="flex h-full flex-col overflow-hidden rounded-xl transition-all duration-500 hover:-translate-y-1"
                           style={{
@@ -1082,10 +1091,43 @@ function ProductsInner() {
                                 -{savings}%
                               </span>
                             </div>
+                            {isCustomer && (
+                              <button
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  toggleWhitelist(product)
+                                }}
+                                className="absolute top-2.5 right-2.5 flex size-8 cursor-pointer items-center justify-center rounded-full transition-all duration-200"
+                                style={{
+                                  background: isWishlisted
+                                    ? TK.camel
+                                    : "oklch(0.97 0.012 78 / 0.88)",
+                                  backdropFilter: "blur(4px)",
+                                  boxShadow:
+                                    "0 2px 8px oklch(0.18 0.014 55 / 0.18)",
+                                }}
+                                aria-label={
+                                  isWishlisted ? "Bỏ yêu thích" : "Yêu thích"
+                                }
+                              >
+                                <Heart
+                                  className="size-4 transition-all duration-200"
+                                  style={{
+                                    stroke: isWishlisted ? TK.cream : TK.muted,
+                                    fill: isWishlisted
+                                      ? TK.cream
+                                      : "transparent",
+                                  }}
+                                  strokeWidth={1.8}
+                                />
+                              </button>
+                            )}
                             {!oos && (
                               <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
-                                <button
-                                  className="flex w-full cursor-pointer items-center justify-center gap-1.5 rounded-lg py-2.5 text-[10px] font-black tracking-[0.18em] uppercase"
+                                <Link
+                                  href={`/product/${product.id}`}
+                                  className="flex w-full items-center justify-center gap-1.5 rounded-lg py-2.5 text-[10px] font-black tracking-[0.18em] uppercase"
                                   style={{
                                     background: "oklch(0.97 0.012 78 / 0.95)",
                                     color: TK.espresso,
@@ -1094,7 +1136,7 @@ function ProductsInner() {
                                 >
                                   Thuê ngay{" "}
                                   <ArrowUpRight className="size-3.5" />
-                                </button>
+                                </Link>
                               </div>
                             )}
                           </div>
@@ -1223,7 +1265,7 @@ function ProductsInner() {
                             </div>
                           </div>
                         </div>
-                      </Link>
+                      </div>
                     )
                   })}
                 </div>
@@ -1350,6 +1392,7 @@ function ProductsInner() {
                 setMobileOpen(false)
               }}
               onReset={resetAll}
+              allProducts={allProducts}
             />
           </div>
         </>

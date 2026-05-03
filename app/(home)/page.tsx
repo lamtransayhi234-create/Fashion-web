@@ -16,6 +16,7 @@ import {
 } from "lucide-react"
 
 import { ProductCard, type ProductCardProps } from "@/components/product-card"
+import { products as allProducts, providers } from "@/lib/data/products"
 import {
   CategoryCard,
   type CategoryCardProps,
@@ -96,64 +97,28 @@ const CATEGORIES: CategoryCardProps[] = [
   },
 ]
 
-const PRODUCTS: ProductCardProps[] = [
-  {
-    title: "Váy hai dây hoa nhí vintage",
-    pricePerDay: "50.000đ/ngày",
-    image: "/Home-Img/item-hot/image-1.jpg",
-    imageAlt: "Dainty vintage floral sundress",
+const HOT_PRODUCT_IDS = ["p090", "p091", "p092", "p093"]
+
+const PRODUCTS: ProductCardProps[] = HOT_PRODUCT_IDS.map((id) => {
+  const p = allProducts.find((x) => x.id === id)!
+  const provider = providers.find((v) => v.id === p.providerId)!
+  return {
+    product: p,
+    pricePerDay: `${p.rentalPrice.toLocaleString("vi-VN")}đ/ngày`,
+    image: p.src,
+    imageAlt: p.name,
     owner: {
-      handle: "@minhchau.closet",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAGoRLOSPBo3mE3p7pgOCi7aSLZ5txldb_-EKyGD20CCNLfmfPeJj1v30f7JZ0UxBY0F5ay4zlUAy-iYz_DYtLguB-GZp6zugbO0QYdvwIGjiRrwG5gghfehI5jvk6xmQ1YcX4KknQzvi6WijThtPO9fq1BirWRCe3y2P4Edgf_z8JFwcslf6qcSfRm6GeTw4wKAgHlA4-xn3HCXk74U9xcFJ9w5dGjYhphgU4JgBGioLY-N_IfeRMgNgNLIG8FYaT7ZZtpT-temE0",
-      location: "Quận 3",
+      handle: provider.handle,
+      avatar: provider.avatar,
+      location: provider.location,
     },
-    rating: 4.9,
-    availability: { label: "Còn trống từ 20/4", tone: "success" },
-  },
-  {
-    title: "Set Blazer Lilac hiện đại",
-    pricePerDay: "120.000đ/ngày",
-    image: "/Home-Img/item-hot/image-2.jpg",
-    imageAlt: "Stylish lilac blazer set",
-    owner: {
-      handle: "@tlinh.rent",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuDfbvTIEroHE2wcVmxOFXWhWUvqiy_5Xecg7lLPD2NGjwMFbajW7Wf1Cn4YUlf5HdUFFVRaUwaG8j2yoU0ipsJyOp9OwvnRNYckfVQ9aBx9OdT-6vUYFgXXwtyHyW6zo94UlEyDMih0jNnZXqm5yQzV_ZlUfB0_zQOdrpPMG8eWb_47TpS9U3rf_6PwKMmKaqfnXV4xvX57HY1tWTQoduXchV0DgLwaSxl0Tanqp1VhaCwkDW56nfAO1aXRHHTVQdxmhGbvMLVL0ng",
-      location: "Đống Đa",
-    },
-    rating: 5.0,
-    availability: { label: "Sẵn sàng ngay", tone: "success" },
-  },
-  {
-    title: "Đầm lụa Champagne dự tiệc",
-    pricePerDay: "200.000đ/ngày",
-    image: "/Home-Img/item-hot/image-3.jpg",
-    imageAlt: "Luxurious silk slip dress",
-    owner: {
-      handle: "@luxury.closet",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuAuBPllCk5lo5BV6GkkonXg-w79mV3MsHOB0lq9jA7WKUL6sHBVl6l0Z-MSRN4BoJxGLnVxiSLGSc-B88PLyXfTKn2xMYnvS7UdlSwh5YGh8-8ZaslV8sV_UUGCG_itf7L1X9rKAaQyvSl-wk9rqVUyTRjG4QAK3dKfB7u18MDNEwteEKE7DZpqM26dqekVjunl51WA2LmaiLQM5oesc8cuRJpAXfyLIx5eJFIAL8uWbj1fFr9UMPRKVYljVHQ9DBt0SS1XlXEGFxo",
-      location: "Quận 1",
-    },
-    rating: 4.8,
-    availability: { label: "Chỉ còn 1 chiếc", tone: "danger" },
-  },
-  {
-    title: "Top bướm denim Y2K",
-    pricePerDay: "45.000đ/ngày",
-    image: "/Home-Img/item-hot/image-4.jpg",
-    imageAlt: "Y2K denim butterfly top",
-    owner: {
-      handle: "@genz.vibes",
-      avatar:
-        "https://lh3.googleusercontent.com/aida-public/AB6AXuCl4XYyns_UQe5aOEDQJJ2lNlk5uKew-M38lSJ6knxIVRLaQGAPWCPyRLC5dibsuM2aYz0mT61ycv5GJkvIdVfr143IH_9oHQESuvQTXeA4GnQ5rZC_8wNWM5JEokpNwJOmNLY3RGoQulBGo-zabGFloE9ZR0yZp9LccQr9erMdr6WaIFG74G6c9jbSLAgWqqb2aj40mdaLlC4vMXmE2V2fwbqkMDuSBjWeWg1DhVwacmnmFfQTgTxBDZlsY_Ay0wR31VPSsk",
-      location: "Quận 7",
-    },
-    rating: 4.7,
-    availability: { label: "Còn trống 25/4", tone: "success" },
-  },
-]
+    rating: p.rating,
+    availability:
+      p.status === "available"
+        ? { label: "Sẵn sàng ngay", tone: "success" as const }
+        : { label: "Hết hàng", tone: "danger" as const },
+  }
+})
 
 const TESTIMONIALS: TestimonialCardProps[] = [
   {
@@ -651,7 +616,7 @@ export default function HomePage() {
         </div>
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
           {PRODUCTS.map((product) => (
-            <ProductCard key={product.title} {...product} />
+            <ProductCard key={product.product.id} {...product} />
           ))}
         </div>
       </section>

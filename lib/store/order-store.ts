@@ -4,6 +4,7 @@ import { create } from "zustand"
 
 export type PendingRental = {
   productId: string
+  providerId: string
   productName: string
   productSrc: string
   productType: string

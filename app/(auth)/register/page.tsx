@@ -3,7 +3,7 @@
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
-import { Eye, EyeOff, Lock, Mail, Store, StoreIcon, User } from "lucide-react"
+import { Eye, EyeOff, Lock, Mail, Phone, Store, StoreIcon, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
@@ -41,6 +41,7 @@ export default function RegisterPage() {
   const [confirm, setConfirm] = useState("")
   const [role, setRole] = useState<RegisterRole>("user")
   const [shopName, setShopName] = useState("")
+  const [phone, setPhone] = useState("")
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
@@ -60,6 +61,10 @@ export default function RegisterPage() {
       setError("Vui lòng nhập tên cửa hàng.")
       return
     }
+    if (role === "supplier" && !phone.trim()) {
+      setError("Vui lòng nhập số điện thoại.")
+      return
+    }
     setLoading(true)
     const res = register({
       email,
@@ -67,6 +72,7 @@ export default function RegisterPage() {
       name,
       role,
       shopName: role === "supplier" ? shopName.trim() : undefined,
+      phone: role === "supplier" ? phone.trim() : undefined,
     })
     setLoading(false)
     if (!res.success) {
@@ -191,31 +197,57 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            {/* Shop name (supplier) */}
+            {/* Shop name + phone (supplier) */}
             {role === "supplier" && (
-              <div className="animate-in fade-in slide-in-from-top-1 space-y-1.5 duration-300">
-                <label
-                  htmlFor="shopName"
-                  className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase"
-                >
-                  Tên cửa hàng
-                </label>
-                <div className="relative">
-                  <StoreIcon
-                    className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[oklch(0.55_0.024_60)]"
-                    strokeWidth={1.4}
-                  />
-                  <input
-                    id="shopName"
-                    type="text"
-                    required
-                    value={shopName}
-                    onChange={(e) => setShopName(e.target.value)}
-                    placeholder="Bảo Closet"
-                    className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pl-10 pr-4 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
-                  />
+              <>
+                <div className="animate-in fade-in slide-in-from-top-1 space-y-1.5 duration-300">
+                  <label
+                    htmlFor="shopName"
+                    className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase"
+                  >
+                    Tên cửa hàng
+                  </label>
+                  <div className="relative">
+                    <StoreIcon
+                      className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[oklch(0.55_0.024_60)]"
+                      strokeWidth={1.4}
+                    />
+                    <input
+                      id="shopName"
+                      type="text"
+                      required
+                      value={shopName}
+                      onChange={(e) => setShopName(e.target.value)}
+                      placeholder="Bảo Closet"
+                      className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pl-10 pr-4 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
+                    />
+                  </div>
                 </div>
-              </div>
+
+                <div className="animate-in fade-in slide-in-from-top-1 space-y-1.5 duration-300">
+                  <label
+                    htmlFor="phone"
+                    className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase"
+                  >
+                    Số điện thoại
+                  </label>
+                  <div className="relative">
+                    <Phone
+                      className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-[oklch(0.55_0.024_60)]"
+                      strokeWidth={1.4}
+                    />
+                    <input
+                      id="phone"
+                      type="tel"
+                      required
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      placeholder="0901 234 567"
+                      className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pl-10 pr-4 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
+                    />
+                  </div>
+                </div>
+              </>
             )}
 
             {/* Email */}

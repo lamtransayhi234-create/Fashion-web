@@ -53,35 +53,35 @@ export type Product = {
 
 export const providers: Provider[] = [
   {
-    id: "prov001",
+    id: "s-001",
     shopName: "Minhchau Closet",
     handle: "@minhchau.closet",
     avatar: "https://i.pravatar.cc/150?img=1",
     location: "Quận 3",
   },
   {
-    id: "prov002",
+    id: "s-002",
     shopName: "Trang's Wardrobe",
     handle: "@trang.closet",
     avatar: "https://i.pravatar.cc/150?img=2",
     location: "Quận 7",
   },
   {
-    id: "prov003",
+    id: "s-003",
     shopName: "Luxury Closet HCM",
     handle: "@luxury.closet",
     avatar: "https://i.pravatar.cc/150?img=3",
     location: "Quận 1",
   },
   {
-    id: "prov004",
+    id: "s-004",
     shopName: "GenZ Vibes",
     handle: "@genz.vibes",
     avatar: "https://i.pravatar.cc/150?img=4",
     location: "Cầu Giấy",
   },
   {
-    id: "prov005",
+    id: "s-005",
     shopName: "Linh's Fashion",
     handle: "@linh.fashion",
     avatar: "https://i.pravatar.cc/150?img=5",
@@ -110,7 +110,7 @@ export const products: Product[] = [
     color: "Kem",
     tags: ["Dự tiệc", "Date night", "Sang chảnh"],
     rating: 5,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p002",
@@ -126,7 +126,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Vintage", "Chụp ảnh", "Dạo phố"],
     rating: 4,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p003",
@@ -142,7 +142,7 @@ export const products: Product[] = [
     color: "Be",
     tags: ["Dự tiệc", "Sang chảnh", "Date night"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p004",
@@ -158,7 +158,7 @@ export const products: Product[] = [
     color: "Hồng nhạt",
     tags: ["Vintage", "Cottagecore", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p005",
@@ -174,7 +174,7 @@ export const products: Product[] = [
     color: "Nâu đất",
     tags: ["Dạo phố", "Casual", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p006",
@@ -190,7 +190,7 @@ export const products: Product[] = [
     color: "Champagne",
     tags: ["Dự tiệc", "Sang chảnh", "Cưới hỏi"],
     rating: 5,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p007",
@@ -206,7 +206,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Vintage", "Cottagecore", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p008",
@@ -222,7 +222,7 @@ export const products: Product[] = [
     color: "Xanh kẻ",
     tags: ["Đi làm", "Sang chảnh", "Date night"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p009",
@@ -238,7 +238,7 @@ export const products: Product[] = [
     color: "Hồng pastel",
     tags: ["Dạo phố", "Chụp ảnh", "Casual"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p010",
@@ -254,7 +254,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Date night", "Sang chảnh", "Dự tiệc"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p011",
@@ -270,7 +270,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Vintage", "Chụp ảnh", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p012",
@@ -286,7 +286,7 @@ export const products: Product[] = [
     color: "Be ren",
     tags: ["Dự tiệc", "Cưới hỏi", "Sang chảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p013",
@@ -302,7 +302,7 @@ export const products: Product[] = [
     color: "Xanh denim nhạt",
     tags: ["Y2K", "Dạo phố", "Casual"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p014",
@@ -318,7 +318,7 @@ export const products: Product[] = [
     color: "Be cottagecore",
     tags: ["Cottagecore", "Vintage", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p015",
@@ -334,7 +334,7 @@ export const products: Product[] = [
     color: "Champagne",
     tags: ["Dự tiệc", "Sang chảnh", "Date night"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p016",
@@ -350,7 +350,7 @@ export const products: Product[] = [
     color: "Trắng voan",
     tags: ["Boho", "Đi biển", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p017",
@@ -366,7 +366,7 @@ export const products: Product[] = [
     color: "Hồng đất",
     tags: ["Dự tiệc", "Sang chảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p018",
@@ -382,7 +382,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Date night", "Dạo phố"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p019",
@@ -398,7 +398,7 @@ export const products: Product[] = [
     color: "Xanh tropical",
     tags: ["Đi biển", "Boho", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p020",
@@ -414,7 +414,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Dự tiệc", "Cưới hỏi", "Sang chảnh"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p021",
@@ -430,7 +430,7 @@ export const products: Product[] = [
     color: "Xanh navy",
     tags: ["Dự tiệc", "Sang chảnh"],
     rating: 5,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p022",
@@ -446,7 +446,7 @@ export const products: Product[] = [
     color: "Be ren",
     tags: ["Dự tiệc", "Cưới hỏi", "Sang chảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p023",
@@ -462,7 +462,7 @@ export const products: Product[] = [
     color: "Be hoa",
     tags: ["Vintage", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
 
   // ── Áo kiểu (12) ────────────────────────────────────────────────────────────
@@ -481,7 +481,7 @@ export const products: Product[] = [
     color: "Trắng họa tiết",
     tags: ["Y2K", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p025",
@@ -497,7 +497,7 @@ export const products: Product[] = [
     color: "Họa tiết",
     tags: ["Đi làm", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p026",
@@ -513,7 +513,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Vintage", "Chụp ảnh", "Date night"],
     rating: 5,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p027",
@@ -529,7 +529,7 @@ export const products: Product[] = [
     color: "Trắng ren",
     tags: ["Sang chảnh", "Dự tiệc", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p028",
@@ -545,7 +545,7 @@ export const products: Product[] = [
     color: "Hồng pastel",
     tags: ["Casual", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p029",
@@ -561,7 +561,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Casual", "Đi biển", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p030",
@@ -577,7 +577,7 @@ export const products: Product[] = [
     color: "Be len",
     tags: ["Casual", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p031",
@@ -593,7 +593,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Cottagecore", "Chụp ảnh", "Dạo phố"],
     rating: 5,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p032",
@@ -609,7 +609,7 @@ export const products: Product[] = [
     color: "Be tweed",
     tags: ["Sang chảnh", "Dự tiệc", "Đi làm"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p033",
@@ -625,7 +625,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Y2K", "Dạo phố", "Casual"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p034",
@@ -641,7 +641,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Sang chảnh", "Date night", "Dự tiệc"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p035",
@@ -657,7 +657,7 @@ export const products: Product[] = [
     color: "Kem",
     tags: ["Vintage", "Đi làm", "Dạo phố"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
 
   // ── Chân váy (12) ────────────────────────────────────────────────────────────
@@ -676,7 +676,7 @@ export const products: Product[] = [
     color: "Cam mơ",
     tags: ["Casual", "Dạo phố", "Đi biển"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p037",
@@ -692,7 +692,7 @@ export const products: Product[] = [
     color: "Đen trắng chấm bi",
     tags: ["Vintage", "Đi làm", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p038",
@@ -708,7 +708,7 @@ export const products: Product[] = [
     color: "Xanh denim",
     tags: ["Y2K", "Dạo phố", "Casual"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p039",
@@ -724,7 +724,7 @@ export const products: Product[] = [
     color: "Xanh denim",
     tags: ["Casual", "Dạo phố", "Vintage"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p040",
@@ -740,7 +740,7 @@ export const products: Product[] = [
     color: "Hồng hoa",
     tags: ["Cottagecore", "Chụp ảnh", "Dạo phố"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p041",
@@ -756,7 +756,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Boho", "Đi biển", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p042",
@@ -772,7 +772,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Y2K", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p043",
@@ -788,7 +788,7 @@ export const products: Product[] = [
     color: "Xanh navy",
     tags: ["Đi làm", "Dạo phố", "Casual"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p044",
@@ -804,7 +804,7 @@ export const products: Product[] = [
     color: "Xanh denim hoa",
     tags: ["Vintage", "Y2K", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p045",
@@ -820,7 +820,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Dự tiệc", "Date night", "Sang chảnh"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p046",
@@ -836,7 +836,7 @@ export const products: Product[] = [
     color: "Be lụa",
     tags: ["Casual", "Dạo phố", "Sang chảnh"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p047",
@@ -852,7 +852,7 @@ export const products: Product[] = [
     color: "Đen trắng chấm bi",
     tags: ["Y2K", "Date night", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
 
   // ── Set đồ (10) ──────────────────────────────────────────────────────────────
@@ -871,7 +871,7 @@ export const products: Product[] = [
     color: "Caro đen trắng",
     tags: ["Y2K", "Dạo phố", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p049",
@@ -887,7 +887,7 @@ export const products: Product[] = [
     color: "Hồng hoa",
     tags: ["Vintage", "Cottagecore", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p050",
@@ -903,7 +903,7 @@ export const products: Product[] = [
     color: "Đen trắng",
     tags: ["Y2K", "Streetwear", "Dạo phố"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p051",
@@ -919,7 +919,7 @@ export const products: Product[] = [
     color: "Xanh denim",
     tags: ["Vintage", "Y2K", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p052",
@@ -935,7 +935,7 @@ export const products: Product[] = [
     color: "Xanh denim",
     tags: ["Casual", "Dạo phố", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p053",
@@ -951,7 +951,7 @@ export const products: Product[] = [
     color: "Be linen",
     tags: ["Casual", "Đi biển", "Dạo phố"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p054",
@@ -967,7 +967,7 @@ export const products: Product[] = [
     color: "Trắng voan",
     tags: ["Chụp ảnh", "Sang chảnh", "Dự tiệc"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p055",
@@ -983,7 +983,7 @@ export const products: Product[] = [
     color: "Vàng hoa",
     tags: ["Đi biển", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p056",
@@ -999,7 +999,7 @@ export const products: Product[] = [
     color: "Trắng kem",
     tags: ["Casual", "Đi biển", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p057",
@@ -1015,7 +1015,7 @@ export const products: Product[] = [
     color: "Trắng voan",
     tags: ["Chụp ảnh", "Cottagecore", "Dự tiệc"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
 
   // ── Giày Dép (12) ────────────────────────────────────────────────────────────
@@ -1034,7 +1034,7 @@ export const products: Product[] = [
     color: "Họa tiết",
     tags: ["Dự tiệc", "Sang chảnh"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p059",
@@ -1050,7 +1050,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Casual", "Đi biển", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p060",
@@ -1066,7 +1066,7 @@ export const products: Product[] = [
     color: "Trắng hoa",
     tags: ["Boho", "Đi biển", "Dạo phố"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p061",
@@ -1082,7 +1082,7 @@ export const products: Product[] = [
     color: "Nâu",
     tags: ["Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p062",
@@ -1098,7 +1098,7 @@ export const products: Product[] = [
     color: "Be cói",
     tags: ["Casual", "Đi biển", "Vintage"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p063",
@@ -1114,7 +1114,7 @@ export const products: Product[] = [
     color: "Đỏ họa tiết",
     tags: ["Dự tiệc", "Chụp ảnh", "Sang chảnh"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p064",
@@ -1130,7 +1130,7 @@ export const products: Product[] = [
     color: "Be",
     tags: ["Đi làm", "Dự tiệc", "Sang chảnh"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p065",
@@ -1146,7 +1146,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Dự tiệc", "Sang chảnh", "Đi làm"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p066",
@@ -1162,7 +1162,7 @@ export const products: Product[] = [
     color: "Nâu vintage",
     tags: ["Vintage", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p067",
@@ -1178,7 +1178,7 @@ export const products: Product[] = [
     color: "Trắng ngà",
     tags: ["Cưới hỏi", "Dự tiệc", "Sang chảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p068",
@@ -1194,7 +1194,7 @@ export const products: Product[] = [
     color: "Hồng",
     tags: ["Dự tiệc", "Chụp ảnh", "Sang chảnh"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p069",
@@ -1210,7 +1210,7 @@ export const products: Product[] = [
     color: "Nâu",
     tags: ["Đi biển", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
 
   // ── Mũ & Nón (8) ────────────────────────────────────────────────────────────
@@ -1229,7 +1229,7 @@ export const products: Product[] = [
     color: "Be",
     tags: ["Đi biển", "Vintage", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p071",
@@ -1245,7 +1245,7 @@ export const products: Product[] = [
     color: "Vàng cói",
     tags: ["Đi biển", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p072",
@@ -1261,7 +1261,7 @@ export const products: Product[] = [
     color: "Đen",
     tags: ["Vintage", "Dạo phố", "Sang chảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p073",
@@ -1277,7 +1277,7 @@ export const products: Product[] = [
     color: "Caro đen trắng",
     tags: ["Y2K", "Streetwear", "Dạo phố"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p074",
@@ -1293,7 +1293,7 @@ export const products: Product[] = [
     color: "Vàng cói",
     tags: ["Đi biển", "Casual", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p075",
@@ -1309,7 +1309,7 @@ export const products: Product[] = [
     color: "Trắng",
     tags: ["Đi biển", "Dự tiệc", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p076",
@@ -1325,7 +1325,7 @@ export const products: Product[] = [
     color: "Be len",
     tags: ["Casual", "Streetwear", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p077",
@@ -1341,7 +1341,7 @@ export const products: Product[] = [
     color: "Vàng cói",
     tags: ["Đi biển", "Boho", "Chụp ảnh"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
 
   // ── Trang sức (12) ───────────────────────────────────────────────────────────
@@ -1360,7 +1360,7 @@ export const products: Product[] = [
     color: "Trắng ngọc trai",
     tags: ["Sang chảnh", "Dự tiệc", "Cưới hỏi"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p079",
@@ -1376,7 +1376,7 @@ export const products: Product[] = [
     color: "Bạc đá",
     tags: ["Vintage", "Sang chảnh", "Dự tiệc"],
     rating: 4,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p080",
@@ -1392,7 +1392,7 @@ export const products: Product[] = [
     color: "Bạc pha lê",
     tags: ["Dự tiệc", "Sang chảnh"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p081",
@@ -1408,7 +1408,7 @@ export const products: Product[] = [
     color: "Bạc",
     tags: ["Vintage", "Casual", "Dạo phố"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p082",
@@ -1424,7 +1424,7 @@ export const products: Product[] = [
     color: "Vàng",
     tags: ["Sang chảnh", "Dạo phố", "Dự tiệc"],
     rating: 5,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p083",
@@ -1440,7 +1440,7 @@ export const products: Product[] = [
     color: "Hoa khô tự nhiên",
     tags: ["Cottagecore", "Boho", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p084",
@@ -1456,7 +1456,7 @@ export const products: Product[] = [
     color: "Trắng ngọc trai",
     tags: ["Sang chảnh", "Dự tiệc", "Cưới hỏi"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
   },
   {
     id: "p085",
@@ -1472,7 +1472,7 @@ export const products: Product[] = [
     color: "Vàng",
     tags: ["Dự tiệc", "Sang chảnh", "Cưới hỏi"],
     rating: 5,
-    providerId: "prov005",
+    providerId: "s-005",
   },
   {
     id: "p086",
@@ -1488,7 +1488,7 @@ export const products: Product[] = [
     color: "Vàng cổ điển",
     tags: ["Vintage", "Casual", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov001",
+    providerId: "s-001",
   },
   {
     id: "p087",
@@ -1504,7 +1504,7 @@ export const products: Product[] = [
     color: "Nhiều màu",
     tags: ["Boho", "Dạo phố", "Chụp ảnh"],
     rating: 4,
-    providerId: "prov002",
+    providerId: "s-002",
   },
   {
     id: "p088",
@@ -1520,7 +1520,7 @@ export const products: Product[] = [
     color: "Bạc đá",
     tags: ["Y2K", "Date night", "Dự tiệc"],
     rating: 5,
-    providerId: "prov003",
+    providerId: "s-003",
   },
   {
     id: "p089",
@@ -1536,6 +1536,95 @@ export const products: Product[] = [
     color: "Trắng ngọc",
     tags: ["Cưới hỏi", "Sang chảnh", "Dự tiệc"],
     rating: 5,
-    providerId: "prov004",
+    providerId: "s-004",
+  },
+
+  // ── Hot picks (homepage) ─────────────────────────────────────────────────────
+
+  {
+    id: "p090",
+    src: "/Home-Img/item-hot/image-1.jpg",
+    name: "Váy hai dây hoa nhí vintage",
+    brandPrice: 500000,
+    rentalPrice: 50000,
+    status: "available",
+    description: "Váy hai dây họa tiết hoa nhí vintage nhẹ nhàng, dáng suông thướt tha, phù hợp dạo phố và chụp ảnh ngoài trời.",
+    category: "Trang phục",
+    type: "Váy & Đầm",
+    sizes: ["S", "M"],
+    color: "Trắng hoa",
+    tags: ["Vintage", "Dạo phố", "Chụp ảnh"],
+    rating: 5,
+    providerId: "s-001",
+  },
+  {
+    id: "p091",
+    src: "/Home-Img/item-hot/image-2.jpg",
+    name: "Set Blazer Lilac hiện đại",
+    brandPrice: 1200000,
+    rentalPrice: 120000,
+    status: "available",
+    description: "Set blazer tông tím lilac thanh lịch, kiểu dáng hiện đại năng động, phù hợp đi làm và dự sự kiện.",
+    category: "Trang phục",
+    type: "Set",
+    sizes: ["S", "M", "L"],
+    color: "Tím lilac",
+    tags: ["Công sở", "Sự kiện", "Hiện đại"],
+    rating: 5,
+    providerId: "s-005",
+  },
+  {
+    id: "p092",
+    src: "/Home-Img/item-hot/image-3.jpg",
+    name: "Đầm lụa Champagne dự tiệc",
+    brandPrice: 2000000,
+    rentalPrice: 200000,
+    status: "available",
+    description: "Đầm lụa champagne sang trọng, dáng trượt ôm nhẹ, tôn dáng hoàn hảo cho các buổi tiệc tối và sự kiện đặc biệt.",
+    category: "Trang phục",
+    type: "Váy & Đầm",
+    sizes: ["S", "M"],
+    color: "Champagne",
+    tags: ["Dự tiệc", "Sang chảnh", "Date night"],
+    rating: 5,
+    providerId: "s-003",
+  },
+  {
+    id: "p093",
+    src: "/Home-Img/item-hot/image-4.jpg",
+    name: "Top bướm denim Y2K",
+    brandPrice: 450000,
+    rentalPrice: 45000,
+    status: "available",
+    description: "Top bướm chất denim phong cách Y2K cá tính, thiết kế độc đáo nổi bật, hoàn hảo cho các buổi chụp ảnh và dạo phố.",
+    category: "Trang phục",
+    type: "Áo kiểu",
+    sizes: ["S", "M", "L"],
+    color: "Xanh denim",
+    tags: ["Y2K", "Cá tính", "Chụp ảnh"],
+    rating: 4,
+    providerId: "s-004",
   },
 ]
+
+export type UploadStatus = "pending" | "approved" | "rejected"
+
+export type SubmittedProduct = {
+  id: string
+  supplierId: string
+  supplierName: string
+  shopName: string
+  uploadStatus: UploadStatus
+  submittedAt: string
+  rejectReason?: string
+  src: string
+  name: string
+  brandPrice: number
+  rentalPrice: number
+  description: string
+  category: ProductCategory
+  type: ProductType
+  sizes: ProductSize[]
+  color: string
+  tags: string[]
+}

@@ -3,6 +3,8 @@
 import { create } from "zustand"
 import { persist } from "zustand/middleware"
 
+import type { Product } from "@/lib/data/products"
+
 export type UserRole = "user" | "admin" | "supplier"
 
 // ─── Order type ───────────────────────────────────────────────────────────────
@@ -12,6 +14,7 @@ export type OrderStatus = "pending" | "confirmed" | "completed" | "cancelled"
 export type Order = {
   id: string
   userId: string
+  providerId: string
   productId: string
   productName: string
   productSrc: string
@@ -25,6 +28,7 @@ export type Order = {
   total: number
   deposit: number
   address: string
+  phone: string
   paymentMethod: "bank" | "momo"
   paymentMethodLabel: string
   note: string
@@ -42,12 +46,23 @@ export type AuthUser = {
   phone?: string
   address?: string
   orders: Order[]
+  whitelist: Product[]
   // role-specific
   shopName?: string   // supplier
   permissions?: string[] // admin
 }
 
 // ─── Mock users ───────────────────────────────────────────────────────────────
+
+// SVG data-URL avatars — no external dependency
+const AVATAR_USER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8dcc8'/%3E%3Ccircle cx='50' cy='36' r='20' fill='%23b8956a'/%3E%3Cellipse cx='50' cy='90' rx='32' ry='22' fill='%23b8956a'/%3E%3C/svg%3E"
+
+const AVATAR_SUPPLIER =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8dcc8'/%3E%3Crect x='22' y='48' width='56' height='34' fill='%23b8956a'/%3E%3Cpolygon points='14,48 86,48 76,22 24,22' fill='%238b6f4e'/%3E%3Crect x='40' y='62' width='20' height='20' fill='%23e8dcc8'/%3E%3C/svg%3E"
+
+const AVATAR_ADMIN =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231c1917'/%3E%3Ctext x='50' y='68' font-size='52' font-weight='bold' text-anchor='middle' fill='%23f0e4d0' font-family='Georgia%2Cserif'%3EA%3C/text%3E%3C/svg%3E"
 
 export const MOCK_USERS: AuthUser[] = [
   {
@@ -56,11 +71,9 @@ export const MOCK_USERS: AuthUser[] = [
     password: "user123",
     name: "Linh Nguyễn",
     role: "user",
-    phone: "0901234567",
-    address: "12 Lê Lợi, Q.1, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_USER,
   },
   {
     id: "u-002",
@@ -68,11 +81,9 @@ export const MOCK_USERS: AuthUser[] = [
     password: "user123",
     name: "Trang Phạm",
     role: "user",
-    phone: "0902345678",
-    address: "45 Nguyễn Huệ, Q.1, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_USER,
   },
   {
     id: "u-003",
@@ -80,11 +91,9 @@ export const MOCK_USERS: AuthUser[] = [
     password: "user123",
     name: "Mai Trần",
     role: "user",
-    phone: "0903456789",
-    address: "88 Hai Bà Trưng, Q.3, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_USER,
   },
 ]
 
@@ -95,23 +104,10 @@ export const MOCK_ADMINS: AuthUser[] = [
     password: "admin123",
     name: "Vincent Lê",
     role: "admin",
-    phone: "0911111111",
     permissions: ["users.manage", "orders.manage", "products.manage", "reports.view"],
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=faces",
-  },
-  {
-    id: "a-002",
-    email: "admin2@styleloop.vn",
-    password: "admin123",
-    name: "Hà Đặng",
-    role: "admin",
-    phone: "0922222222",
-    permissions: ["users.manage", "reports.view"],
-    orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_ADMIN,
   },
 ]
 
@@ -126,8 +122,8 @@ export const MOCK_SUPPLIERS: AuthUser[] = [
     phone: "0931111111",
     address: "120 Phan Xích Long, Q.Phú Nhuận, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_SUPPLIER,
   },
   {
     id: "s-002",
@@ -139,8 +135,8 @@ export const MOCK_SUPPLIERS: AuthUser[] = [
     phone: "0932222222",
     address: "55 Trần Hưng Đạo, Q.5, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_SUPPLIER,
   },
   {
     id: "s-003",
@@ -152,8 +148,34 @@ export const MOCK_SUPPLIERS: AuthUser[] = [
     phone: "0933333333",
     address: "9 Lý Tự Trọng, Q.1, TP.HCM",
     orders: [],
-    avatar:
-      "https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=200&h=200&fit=crop&crop=faces",
+    whitelist: [],
+    avatar: AVATAR_SUPPLIER,
+  },
+  {
+    id: "s-004",
+    email: "supplier4@styleloop.vn",
+    password: "supplier123",
+    name: "Lan Hoàng",
+    role: "supplier",
+    shopName: "GenZ Vibes",
+    phone: "0934444444",
+    address: "88 Xuân Thủy, Cầu Giấy, Hà Nội",
+    orders: [],
+    whitelist: [],
+    avatar: AVATAR_SUPPLIER,
+  },
+  {
+    id: "s-005",
+    email: "supplier5@styleloop.vn",
+    password: "supplier123",
+    name: "Minh Linh",
+    role: "supplier",
+    shopName: "Linh's Fashion",
+    phone: "0935555555",
+    address: "22 Láng Hạ, Đống Đa, Hà Nội",
+    orders: [],
+    whitelist: [],
+    avatar: AVATAR_SUPPLIER,
   },
 ]
 
@@ -185,8 +207,13 @@ type AuthState = {
     name: string
     role?: UserRole
     shopName?: string
+    phone?: string
   }) => { success: true; user: PublicUser } | { success: false; message: string }
+  updateProfile: (patch: { name?: string; phone?: string; address?: string; password?: string; shopName?: string }) => void
   addOrder: (order: Omit<Order, "id" | "createdAt" | "userId">) => Order
+  confirmOrder: (orderId: string) => void
+  updateOrderStatus: (orderId: string, status: OrderStatus) => void
+  toggleWhitelist: (product: Product) => void
 }
 
 const stripPassword = (u: AuthUser): PublicUser => {
@@ -219,7 +246,7 @@ export const useAuthStore = create<AuthState>()(
 
       logout: () => set({ isAuthenticated: false, currentUserId: null, user: null }),
 
-      register: ({ email, password, name, role = "user", shopName }) => {
+      register: ({ email, password, name, role = "user", shopName, phone }) => {
         const normalized = email.trim().toLowerCase()
         if (!email || !password || !name) {
           return { success: false, message: "Vui lòng điền đầy đủ thông tin." }
@@ -235,7 +262,9 @@ export const useAuthStore = create<AuthState>()(
           name,
           role,
           orders: [],
+          whitelist: [],
           shopName: role === "supplier" ? shopName : undefined,
+          phone: role === "supplier" ? phone : undefined,
         }
         const publicUser = stripPassword(newUser)
         set((state) => ({
@@ -245,6 +274,29 @@ export const useAuthStore = create<AuthState>()(
           user: publicUser,
         }))
         return { success: true, user: publicUser }
+      },
+
+      updateProfile: (patch) => {
+        const userId = get().currentUserId
+        if (!userId) return
+        set((state) => {
+          const updatedUsers = state.users.map((u) => {
+            if (u.id !== userId) return u
+            return {
+              ...u,
+              ...(patch.name !== undefined && { name: patch.name }),
+              ...(patch.phone !== undefined && { phone: patch.phone }),
+              ...(patch.address !== undefined && { address: patch.address }),
+              ...(patch.password !== undefined && { password: patch.password }),
+              ...(patch.shopName !== undefined && { shopName: patch.shopName }),
+            }
+          })
+          const updatedRaw = updatedUsers.find((u) => u.id === userId)
+          return {
+            users: updatedUsers,
+            user: updatedRaw ? stripPassword(updatedRaw) : state.user,
+          }
+        })
       },
 
       addOrder: (orderData) => {
@@ -267,9 +319,52 @@ export const useAuthStore = create<AuthState>()(
         })
         return order
       },
+
+      confirmOrder: (orderId) => {
+        get().updateOrderStatus(orderId, "confirmed")
+      },
+
+      updateOrderStatus: (orderId, status) => {
+        set((state) => {
+          const updatedUsers = state.users.map((u) => {
+            const idx = u.orders.findIndex((o) => o.id === orderId)
+            if (idx === -1) return u
+            const updatedOrders = [...u.orders]
+            updatedOrders[idx] = { ...updatedOrders[idx], status }
+            return { ...u, orders: updatedOrders }
+          })
+          const currentRaw = updatedUsers.find((u) => u.id === state.currentUserId)
+          return {
+            users: updatedUsers,
+            user: currentRaw ? stripPassword(currentRaw) : state.user,
+          }
+        })
+      },
+
+      toggleWhitelist: (product) => {
+        const userId = get().currentUserId
+        if (!userId) return
+        set((state) => {
+          const updatedUsers = state.users.map((u) => {
+            if (u.id !== userId) return u
+            const current = u.whitelist
+            const isLiked = current.some((w) => w.id === product.id)
+            const next = isLiked
+              ? current.filter((w) => w.id !== product.id)
+              : [...current, product]
+            return { ...u, whitelist: next }
+          })
+          const updatedRaw = updatedUsers.find((u) => u.id === userId)
+          return {
+            users: updatedUsers,
+            user: updatedRaw ? stripPassword(updatedRaw) : state.user,
+          }
+        })
+      },
     }),
     {
       name: "styleloop-auth",
+      version: 3,
       partialize: (state) => ({
         isAuthenticated:  state.isAuthenticated,
         currentUserId:    state.currentUserId,

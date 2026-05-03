@@ -12,9 +12,10 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  Bell,
   ChevronDown,
   ChevronRight,
+  ClipboardCheck,
+  ClipboardList,
   Heart,
   LayoutDashboard,
   LogIn,
@@ -24,7 +25,6 @@ import {
   Plus,
   Search,
   Shield,
-  ShoppingBag,
   Store,
   User,
   UserPlus,
@@ -47,9 +47,11 @@ import {
   SheetContent,
   SheetTrigger,
   SheetClose,
+  SheetTitle,
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { ROLE_LABEL, useAuthStore } from "@/lib/store/auth-store"
+import { useProductStore } from "@/lib/store/product-store"
 import Image from "next/image"
 
 type NavItem = {
@@ -110,12 +112,32 @@ export function SiteHeader() {
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
   const [searchValue, setSearchValue] = useState("")
   const [accountOpen, setAccountOpen] = useState(false)
+  const [wishlistOpen, setWishlistOpen] = useState(false)
+  const [supplierOrdersOpen, setSupplierOrdersOpen] = useState(false)
+  const [supplierDropdownOpen, setSupplierDropdownOpen] = useState(false)
+  const [adminDropdownOpen, setAdminDropdownOpen] = useState(false)
+  const [adminSheetOpen, setAdminSheetOpen] = useState(false)
   const accountRef = useRef<HTMLDivElement | null>(null)
   const searchRef = useRef<HTMLInputElement | null>(null)
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
+  const users = useAuthStore((s) => s.users)
   const logout = useAuthStore((s) => s.logout)
+  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
+  const wishlist = user?.whitelist ?? []
+  const pendingOrders =
+    user?.role === "supplier"
+      ? users
+          .flatMap((u) => u.orders)
+          .filter((o) => o.providerId === user.id && o.status === "pending")
+      : []
+  const pendingOrderCount = pendingOrders.length
+
+  const submittedProducts = useProductStore((s) => s.submittedProducts)
+  const pendingProducts = submittedProducts.filter((p) => p.uploadStatus === "pending")
+  const pendingProductCount = pendingProducts.length
+
   const hydrated = useSyncExternalStore(
     (cb) => useAuthStore.persist.onFinishHydration(cb),
     () => useAuthStore.persist.hasHydrated(),
@@ -393,6 +415,12 @@ export function SiteHeader() {
                         label: "Cửa hàng của tôi",
                         show: user?.role === "supplier",
                       },
+                      {
+                        href: "/account/ordered",
+                        icon: Package,
+                        label: "Đơn thuê của shop",
+                        show: user?.role === "supplier",
+                      },
                     ]
                       .filter((i) => i.show)
                       .map((i) => (
@@ -555,31 +583,600 @@ export function SiteHeader() {
             )}
           </Button>
 
-          {/* Giỏ hàng */}
-          <Link href="/cart" aria-label="Giỏ hàng">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)]"
-            >
-              <ShoppingBag className="size-5" />
-              <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.6_0.062_60)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
-                2
-              </span>
-            </Button>
-          </Link>
+          {/* Supplier pending orders — Desktop: Dropdown */}
+          {authed && user?.role === "supplier" && (
+            <>
+              <DropdownMenu open={supplierDropdownOpen} onOpenChange={setSupplierDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Đơn chờ xác nhận"
+                    className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
+                  >
+                    <ClipboardList className="size-5" strokeWidth={1.4} />
+                    {pendingOrderCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.55_0.18_28)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {pendingOrderCount > 9 ? "9+" : pendingOrderCount}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="w-80 rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0 shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.3)]"
+                >
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-4 py-3">
+                    <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                      ✦ Chờ xác nhận
+                    </p>
+                    {pendingOrderCount > 0 && (
+                      <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                        {pendingOrderCount} đơn
+                      </span>
+                    )}
+                  </div>
+                  {pendingOrders.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-10 text-center">
+                      <ClipboardList
+                        className="size-8 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[12px] text-[oklch(0.55_0.024_60)]">
+                        Không có đơn nào chờ xác nhận
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {pendingOrders.map((order) => (
+                        <div
+                          key={order.id}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]"
+                        >
+                          <Link
+                            href="/account/ordered"
+                            onClick={() => setSupplierDropdownOpen(false)}
+                            className="flex min-w-0 flex-1 items-center gap-3"
+                          >
+                            <div className="size-12 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={order.productSrc}
+                                alt={order.productName}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {order.productName}
+                              </p>
+                              <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                                {order.fromDate} → {order.toDate}
+                              </p>
+                              <p className="text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                {order.total.toLocaleString("vi-VN")}đ
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-sm bg-[oklch(0.91_0.022_75)] px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-[oklch(0.38_0.028_58)] uppercase">
+                              Chờ
+                            </span>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {pendingOrders.length > 0 && (
+                    <div className="border-t border-[oklch(0.9_0.014_72)] p-2">
+                      <Link
+                        href="/account/ordered"
+                        onClick={() => setSupplierDropdownOpen(false)}
+                        className="flex w-full items-center justify-center rounded-sm py-2 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
+                      >
+                        Xem tất cả đơn →
+                      </Link>
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-          {/* Thông báo — desktop only */}
-          {authed && (
-            <Button
-              variant="ghost"
-              size="icon"
-              aria-label="Thông báo"
-              className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
-            >
-              <Bell className="size-5" />
-              <span className="absolute top-2 right-2 size-1.5 rounded-full bg-[oklch(0.6_0.062_60)] ring-2 ring-[oklch(0.965_0.012_78)]" />
-            </Button>
+              {/* Mobile: Sheet */}
+              <Sheet
+                open={supplierOrdersOpen}
+                onOpenChange={setSupplierOrdersOpen}
+              >
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Đơn chờ xác nhận"
+                    className="relative size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
+                  >
+                    <ClipboardList className="size-5" strokeWidth={1.4} />
+                    {pendingOrderCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.55_0.18_28)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {pendingOrderCount > 9 ? "9+" : pendingOrderCount}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  showCloseButton={false}
+                  className="w-[85vw] max-w-[360px] border-l border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
+                >
+                  <SheetTitle className="sr-only">Đơn chờ xác nhận</SheetTitle>
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-5 py-4">
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                        ✦ Chờ xác nhận
+                      </p>
+                      {pendingOrderCount > 0 && (
+                        <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                          {pendingOrderCount} đơn
+                        </p>
+                      )}
+                    </div>
+                    <SheetClose asChild>
+                      <button className="flex size-8 cursor-pointer items-center justify-center rounded-full text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.91_0.022_75)]">
+                        <X className="size-4" />
+                      </button>
+                    </SheetClose>
+                  </div>
+                  {pendingOrders.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 py-16 text-center">
+                      <ClipboardList
+                        className="size-10 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[13px] text-[oklch(0.55_0.024_60)]">
+                        Không có đơn nào chờ xác nhận
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-y-auto">
+                      {pendingOrders.map((order) => (
+                        <SheetClose key={order.id} asChild>
+                          <Link
+                            href="/account/ordered"
+                            className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 last:border-0 hover:bg-[oklch(0.97_0.012_78)]"
+                          >
+                            <div className="size-14 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={order.productSrc}
+                                alt={order.productName}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {order.productName}
+                              </p>
+                              <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                                {order.fromDate} → {order.toDate}
+                              </p>
+                              <p className="mt-0.5 text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                {order.total.toLocaleString("vi-VN")}đ
+                              </p>
+                            </div>
+                          </Link>
+                        </SheetClose>
+                      ))}
+                    </div>
+                  )}
+                  {pendingOrders.length > 0 && (
+                    <div className="border-t border-[oklch(0.9_0.014_72)] p-3">
+                      <SheetClose asChild>
+                        <Link
+                          href="/account/ordered"
+                          className="flex w-full items-center justify-center rounded-sm py-2.5 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
+                        >
+                          Xem tất cả đơn →
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
+            </>
+          )}
+
+          {/* Admin pending products — Desktop: Dropdown + Mobile: Sheet */}
+          {authed && user?.role === "admin" && (
+            <>
+              <DropdownMenu open={adminDropdownOpen} onOpenChange={setAdminDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Sản phẩm chờ duyệt"
+                    className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
+                  >
+                    <ClipboardCheck className="size-5" strokeWidth={1.4} />
+                    {pendingProductCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.55_0.18_28)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {pendingProductCount > 9 ? "9+" : pendingProductCount}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="w-80 rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0 shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.3)]"
+                >
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-4 py-3">
+                    <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                      ✦ Chờ duyệt
+                    </p>
+                    {pendingProductCount > 0 && (
+                      <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                        {pendingProductCount} sản phẩm
+                      </span>
+                    )}
+                  </div>
+                  {pendingProducts.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-10 text-center">
+                      <ClipboardCheck
+                        className="size-8 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[12px] text-[oklch(0.55_0.024_60)]">
+                        Không có sản phẩm nào chờ duyệt
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {pendingProducts.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]"
+                        >
+                          <Link
+                            href="/admin"
+                            onClick={() => setAdminDropdownOpen(false)}
+                            className="flex min-w-0 flex-1 items-center gap-3"
+                          >
+                            <div className="size-12 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={product.src}
+                                alt={product.name}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {product.name}
+                              </p>
+                              <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                                {product.shopName}
+                              </p>
+                              <p className="text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                {product.rentalPrice.toLocaleString("vi-VN")}đ / ngày
+                              </p>
+                            </div>
+                            <span className="shrink-0 rounded-sm bg-[oklch(0.91_0.022_75)] px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-[oklch(0.38_0.028_58)] uppercase">
+                              Chờ
+                            </span>
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {pendingProducts.length > 0 && (
+                    <div className="border-t border-[oklch(0.9_0.014_72)] p-2">
+                      <Link
+                        href="/admin"
+                        onClick={() => setAdminDropdownOpen(false)}
+                        className="flex w-full items-center justify-center rounded-sm py-2 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
+                      >
+                        Xem tất cả →
+                      </Link>
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile: Sheet */}
+              <Sheet open={adminSheetOpen} onOpenChange={setAdminSheetOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Sản phẩm chờ duyệt"
+                    className="relative size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
+                  >
+                    <ClipboardCheck className="size-5" strokeWidth={1.4} />
+                    {pendingProductCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.55_0.18_28)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {pendingProductCount > 9 ? "9+" : pendingProductCount}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  showCloseButton={false}
+                  className="w-[85vw] max-w-[360px] border-l border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
+                >
+                  <SheetTitle className="sr-only">Sản phẩm chờ duyệt</SheetTitle>
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-5 py-4">
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                        ✦ Chờ duyệt
+                      </p>
+                      {pendingProductCount > 0 && (
+                        <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                          {pendingProductCount} sản phẩm
+                        </p>
+                      )}
+                    </div>
+                    <SheetClose asChild>
+                      <button className="flex size-8 cursor-pointer items-center justify-center rounded-full text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.91_0.022_75)]">
+                        <X className="size-4" />
+                      </button>
+                    </SheetClose>
+                  </div>
+                  {pendingProducts.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 py-16 text-center">
+                      <ClipboardCheck
+                        className="size-10 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[13px] text-[oklch(0.55_0.024_60)]">
+                        Không có sản phẩm nào chờ duyệt
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-y-auto">
+                      {pendingProducts.map((product) => (
+                        <SheetClose key={product.id} asChild>
+                          <Link
+                            href="/admin"
+                            className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 last:border-0 hover:bg-[oklch(0.97_0.012_78)]"
+                          >
+                            <div className="size-14 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={product.src}
+                                alt={product.name}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {product.name}
+                              </p>
+                              <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                                {product.shopName}
+                              </p>
+                              <p className="mt-0.5 text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                {product.rentalPrice.toLocaleString("vi-VN")}đ / ngày
+                              </p>
+                            </div>
+                          </Link>
+                        </SheetClose>
+                      ))}
+                    </div>
+                  )}
+                  {pendingProducts.length > 0 && (
+                    <div className="border-t border-[oklch(0.9_0.014_72)] p-3">
+                      <SheetClose asChild>
+                        <Link
+                          href="/admin"
+                          className="flex w-full items-center justify-center rounded-sm py-2.5 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
+                        >
+                          Xem tất cả →
+                        </Link>
+                      </SheetClose>
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
+            </>
+          )}
+
+          {/* Wishlist — chỉ customer */}
+          {authed && user?.role === "user" && (
+            <>
+              {/* Desktop: Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Yêu thích"
+                    className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
+                  >
+                    <Heart className="size-5" />
+                    {wishlist.length > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.6_0.062_60)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {wishlist.length}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="w-80 rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0 shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.3)]"
+                >
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-4 py-3">
+                    <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                      ✦ Yêu thích
+                    </p>
+                    {wishlist.length > 0 && (
+                      <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                        {wishlist.length} sản phẩm
+                      </span>
+                    )}
+                  </div>
+
+                  {wishlist.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-10 text-center">
+                      <Heart
+                        className="size-8 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[12px] text-[oklch(0.55_0.024_60)]">
+                        Chưa có sản phẩm yêu thích
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {wishlist.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]"
+                        >
+                          <Link
+                            href={`/product/${product.id}`}
+                            className="flex min-w-0 flex-1 items-center gap-3"
+                          >
+                            <div className="size-12 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={product.src}
+                                alt={product.name}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {product.name}
+                              </p>
+                              <p className="text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                {new Intl.NumberFormat("vi-VN").format(
+                                  product.rentalPrice
+                                )}
+                                đ
+                                <span className="ml-0.5 text-[10px] font-normal text-[oklch(0.55_0.024_60)]">
+                                  /ngày
+                                </span>
+                              </p>
+                            </div>
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={() => toggleWhitelist(product)}
+                            className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
+                            aria-label="Bỏ yêu thích"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Mobile: Sheet */}
+              <Sheet open={wishlistOpen} onOpenChange={setWishlistOpen}>
+                <SheetTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Yêu thích"
+                    className="relative size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:hidden"
+                  >
+                    <Heart className="size-5" />
+                    {wishlist.length > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.6_0.062_60)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {wishlist.length}
+                      </span>
+                    )}
+                  </Button>
+                </SheetTrigger>
+                <SheetContent
+                  side="right"
+                  showCloseButton={false}
+                  className="w-[85vw] max-w-[360px] border-l border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
+                >
+                  <SheetTitle className="sr-only">
+                    Danh sách yêu thích
+                  </SheetTitle>
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-5 py-4">
+                    <div>
+                      <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                        ✦ Yêu thích
+                      </p>
+                      {wishlist.length > 0 && (
+                        <p className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                          {wishlist.length} sản phẩm
+                        </p>
+                      )}
+                    </div>
+                    <SheetClose asChild>
+                      <button className="flex size-8 cursor-pointer items-center justify-center rounded-full text-[oklch(0.34_0.03_55)] transition-colors hover:bg-[oklch(0.91_0.022_75)]">
+                        <X className="size-4" />
+                      </button>
+                    </SheetClose>
+                  </div>
+
+                  {wishlist.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 py-16 text-center">
+                      <Heart
+                        className="size-10 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[13px] text-[oklch(0.55_0.024_60)]">
+                        Chưa có sản phẩm yêu thích
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="overflow-y-auto">
+                      {wishlist.map((product) => (
+                        <div
+                          key={product.id}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 last:border-0"
+                        >
+                          <SheetClose asChild>
+                            <Link
+                              href={`/product/${product.id}`}
+                              className="flex min-w-0 flex-1 items-center gap-3"
+                            >
+                              <div className="size-14 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={product.src}
+                                  alt={product.name}
+                                  className="size-full object-cover"
+                                />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                  {product.name}
+                                </p>
+                                <p className="mt-0.5 text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
+                                  {new Intl.NumberFormat("vi-VN").format(
+                                    product.rentalPrice
+                                  )}
+                                  đ
+                                  <span className="ml-0.5 text-[10px] font-normal text-[oklch(0.55_0.024_60)]">
+                                    /ngày
+                                  </span>
+                                </p>
+                              </div>
+                            </Link>
+                          </SheetClose>
+                          <button
+                            type="button"
+                            onClick={() => toggleWhitelist(product)}
+                            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
+                            aria-label="Bỏ yêu thích"
+                          >
+                            <X className="size-3.5" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </SheetContent>
+              </Sheet>
+            </>
           )}
 
           {/* Tài khoản */}
@@ -717,18 +1314,24 @@ export function SiteHeader() {
                       href: "/account/orders",
                       icon: Package,
                       label: "Đơn thuê của tôi",
-                      show: true,
+                      show: user?.role === "user",
                     },
                     {
                       href: "/admin",
                       icon: LayoutDashboard,
-                      label: "Bảng điều khiển",
+                      label: "Quản lý sản phẩm",
                       show: user?.role === "admin",
                     },
                     {
                       href: "/supplier",
                       icon: Store,
                       label: "Cửa hàng của tôi",
+                      show: user?.role === "supplier",
+                    },
+                    {
+                      href: "/account/ordered",
+                      icon: Package,
+                      label: "Đơn thuê của shop",
                       show: user?.role === "supplier",
                     },
                   ]

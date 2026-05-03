@@ -86,7 +86,7 @@ function LoginInner() {
 
       {/* ── Form side ── */}
       <div className="flex items-center justify-center px-6 py-14 sm:px-10 lg:px-16">
-        <div className="w-full max-w-md animate-in fade-in slide-in-from-bottom-2 duration-500">
+        <div className="w-full max-w-md animate-in duration-500 fade-in slide-in-from-bottom-2">
           {/* Eyebrow */}
           <div className="flex items-center gap-3">
             <span className="h-px w-8 bg-[oklch(0.6_0.062_60)]" />
@@ -98,7 +98,7 @@ function LoginInner() {
           {/* Headline */}
           <h1 className="mt-4 font-display text-[40px] leading-[1.05] font-medium tracking-[-0.01em] text-[oklch(0.18_0.014_55)] sm:text-[48px]">
             Chào mừng{" "}
-            <em className="font-normal italic text-[oklch(0.6_0.062_60)]">
+            <em className="font-normal text-[oklch(0.6_0.062_60)] italic">
               trở lại.
             </em>
           </h1>
@@ -128,7 +128,7 @@ function LoginInner() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="ban@styleloop.vn"
-                  className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pl-10 pr-4 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
+                  className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pr-4 pl-10 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
                 />
               </div>
             </div>
@@ -142,12 +142,6 @@ function LoginInner() {
                 >
                   Mật khẩu
                 </label>
-                <Link
-                  href="#"
-                  className="text-[11px] font-medium text-[oklch(0.6_0.062_60)] hover:underline"
-                >
-                  Quên mật khẩu?
-                </Link>
               </div>
               <div className="relative">
                 <Lock
@@ -162,7 +156,7 @@ function LoginInner() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pl-10 pr-11 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
+                  className="h-11 w-full rounded-full border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] pr-11 pl-10 text-[14px] text-[oklch(0.24_0.018_55)] outline-none placeholder:text-[oklch(0.6_0.024_60)] focus:border-[oklch(0.6_0.062_60)] focus:ring-2 focus:ring-[oklch(0.6_0.062_60/0.18)]"
                 />
                 <button
                   type="button"
@@ -215,8 +209,7 @@ function LoginInner() {
             <div className="mt-3 grid gap-1.5 sm:grid-cols-3">
               {DEMO_ACCOUNTS.map((acc) => {
                 const Icon = acc.icon
-                const filled =
-                  email === acc.email && password === acc.password
+                const filled = email === acc.email && password === acc.password
                 return (
                   <button
                     key={acc.email}
