@@ -43,11 +43,24 @@ const CATEGORIES: { value: ProductCategory | "all"; label: string }[] = [
 const PRODUCT_TYPES: ProductType[] = [
   "Váy & Đầm",
   "Áo kiểu",
+  "Áo khoác",
   "Chân váy",
+  "Quần",
+  "Jumpsuit",
+  "Áo dài",
   "Set",
+  "Cao gót",
+  "Boots",
+  "Sandal",
+  "Sneakers",
+  "Giày bệt",
   "Giày Dép",
+  "Túi xách",
   "Mũ & Nón",
   "Trang sức",
+  "Thắt lưng",
+  "Khăn choàng",
+  "Kính mát",
 ]
 
 const CLOTHING_SIZES = ["XS", "S", "M", "L", "XL"]

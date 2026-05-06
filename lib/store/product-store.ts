@@ -102,12 +102,24 @@ export const useProductStore = create<ProductState>()(
     }),
     {
       name: "styleloop-products",
-      version: 2,
+      version: 3,
       partialize: (state) => ({
         allProducts: state.allProducts,
         submittedProducts: state.submittedProducts,
         dynamicProviders: state.dynamicProviders,
       }),
+      migrate: (persisted, fromVersion) => {
+        const prev = (persisted ?? {}) as Partial<ProductState>
+        // v3 expanded ProductType — refresh allProducts from source so new
+        // mock items show up; keep any supplier submissions and dynamic providers.
+        if (fromVersion < 3) {
+          return {
+            ...prev,
+            allProducts: products,
+          } as ProductState
+        }
+        return prev as ProductState
+      },
       onRehydrateStorage: () => () => {},
     }
   )

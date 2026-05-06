@@ -59,9 +59,25 @@ const BADGE_LABEL = {
 // ─── Category → Types mapping ─────────────────────────────────────────────────
 
 const TYPE_BY_CATEGORY: Record<ProductCategory, ProductType[]> = {
-  "Trang phục": ["Váy & Đầm", "Áo kiểu", "Chân váy", "Set"],
-  "Giày Dép": ["Giày Dép"],
-  "Phụ Kiện": ["Mũ & Nón", "Trang sức"],
+  "Trang phục": [
+    "Váy & Đầm",
+    "Áo kiểu",
+    "Áo khoác",
+    "Chân váy",
+    "Quần",
+    "Jumpsuit",
+    "Áo dài",
+    "Set",
+  ],
+  "Giày Dép": ["Cao gót", "Boots", "Sandal", "Sneakers", "Giày bệt", "Giày Dép"],
+  "Phụ Kiện": [
+    "Túi xách",
+    "Mũ & Nón",
+    "Trang sức",
+    "Thắt lưng",
+    "Khăn choàng",
+    "Kính mát",
+  ],
 }
 
 const SIZES_BY_TYPE: Record<string, ProductSize[]> = {
