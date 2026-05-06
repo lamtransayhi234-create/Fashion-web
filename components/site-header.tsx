@@ -135,7 +135,9 @@ export function SiteHeader() {
   const pendingOrderCount = pendingOrders.length
 
   const submittedProducts = useProductStore((s) => s.submittedProducts)
-  const pendingProducts = submittedProducts.filter((p) => p.uploadStatus === "pending")
+  const pendingProducts = submittedProducts.filter(
+    (p) => p.uploadStatus === "pending"
+  )
   const pendingProductCount = pendingProducts.length
 
   const hydrated = useSyncExternalStore(
@@ -173,7 +175,7 @@ export function SiteHeader() {
   const handleLogout = () => {
     logout()
     setAccountOpen(false)
-    router.push("/")
+    // router.push("/")
   }
 
   const handleSearch = useCallback(
@@ -586,7 +588,10 @@ export function SiteHeader() {
           {/* Supplier pending orders — Desktop: Dropdown */}
           {authed && user?.role === "supplier" && (
             <>
-              <DropdownMenu open={supplierDropdownOpen} onOpenChange={setSupplierDropdownOpen}>
+              <DropdownMenu
+                open={supplierDropdownOpen}
+                onOpenChange={setSupplierDropdownOpen}
+              >
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -785,7 +790,10 @@ export function SiteHeader() {
           {/* Admin pending products — Desktop: Dropdown + Mobile: Sheet */}
           {authed && user?.role === "admin" && (
             <>
-              <DropdownMenu open={adminDropdownOpen} onOpenChange={setAdminDropdownOpen}>
+              <DropdownMenu
+                open={adminDropdownOpen}
+                onOpenChange={setAdminDropdownOpen}
+              >
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -854,7 +862,8 @@ export function SiteHeader() {
                                 {product.shopName}
                               </p>
                               <p className="text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
-                                {product.rentalPrice.toLocaleString("vi-VN")}đ / ngày
+                                {product.rentalPrice.toLocaleString("vi-VN")}đ /
+                                ngày
                               </p>
                             </div>
                             <span className="shrink-0 rounded-sm bg-[oklch(0.91_0.022_75)] px-2 py-0.5 text-[10px] font-semibold tracking-[0.12em] text-[oklch(0.38_0.028_58)] uppercase">
@@ -901,7 +910,9 @@ export function SiteHeader() {
                   showCloseButton={false}
                   className="w-[85vw] max-w-[360px] border-l border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0"
                 >
-                  <SheetTitle className="sr-only">Sản phẩm chờ duyệt</SheetTitle>
+                  <SheetTitle className="sr-only">
+                    Sản phẩm chờ duyệt
+                  </SheetTitle>
                   <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-5 py-4">
                     <div>
                       <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
@@ -953,7 +964,8 @@ export function SiteHeader() {
                                 {product.shopName}
                               </p>
                               <p className="mt-0.5 text-[12px] font-semibold text-[oklch(0.6_0.062_60)]">
-                                {product.rentalPrice.toLocaleString("vi-VN")}đ / ngày
+                                {product.rentalPrice.toLocaleString("vi-VN")}đ /
+                                ngày
                               </p>
                             </div>
                           </Link>

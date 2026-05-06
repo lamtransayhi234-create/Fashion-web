@@ -34,7 +34,7 @@ export default function RootLayout({
         "font-sans"
       )}
     >
-      <body className="relative min-h-screen overflow-x-hidden bg-background text-foreground selection:bg-primary/20 selection:text-primary">
+      <body className="relative min-h-screen overflow-x-clip bg-background text-foreground selection:bg-primary/20 selection:text-primary">
         <div
           aria-hidden
           className="pointer-events-none fixed inset-0 -z-20 bg-[radial-gradient(60%_45%_at_12%_8%,oklch(0.93_0.024_70/0.5),transparent_62%),radial-gradient(55%_40%_at_88%_90%,oklch(0.92_0.024_75/0.45),transparent_65%)]"
