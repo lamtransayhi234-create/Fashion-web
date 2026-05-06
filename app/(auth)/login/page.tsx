@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, Suspense } from "react"
+import { useEffect, useState, Suspense, useSyncExternalStore } from "react"
 import { Eye, EyeOff, Lock, Mail, Shield, Store, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,12 +35,24 @@ function LoginInner() {
   const search = useSearchParams()
   const redirect = search?.get("redirect") || "/"
   const login = useAuthStore((s) => s.login)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const hydrated = useSyncExternalStore(
+    (cb) => useAuthStore.persist.onFinishHydration(cb),
+    () => useAuthStore.persist.hasHydrated(),
+    () => false
+  )
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [showPw, setShowPw] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (hydrated && isAuthenticated) router.replace("/")
+  }, [hydrated, isAuthenticated, router])
+
+  if (hydrated && isAuthenticated) return null
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()

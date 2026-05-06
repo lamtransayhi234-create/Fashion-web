@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 import { Eye, EyeOff, Lock, Mail, Phone, Store, StoreIcon, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -34,6 +34,16 @@ const ROLE_OPTIONS: {
 export default function RegisterPage() {
   const router = useRouter()
   const register = useAuthStore((s) => s.register)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const hydrated = useSyncExternalStore(
+    (cb) => useAuthStore.persist.onFinishHydration(cb),
+    () => useAuthStore.persist.hasHydrated(),
+    () => false
+  )
+
+  useEffect(() => {
+    if (hydrated && isAuthenticated) router.replace("/")
+  }, [hydrated, isAuthenticated, router])
 
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
@@ -81,6 +91,8 @@ export default function RegisterPage() {
     }
     router.push("/")
   }
+
+  if (hydrated && isAuthenticated) return null
 
   return (
     <section className="grid min-h-[calc(100vh-3.6rem)] grid-cols-1 bg-[oklch(0.962_0.012_78)] lg:grid-cols-2">
