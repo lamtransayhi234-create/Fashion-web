@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import {
   ArrowLeft,
   ArrowRight,
+  Bell,
   ChevronDown,
   ChevronRight,
   ClipboardCheck,
@@ -49,6 +50,12 @@ import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
 import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
 import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
 import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
+import {
+  useGetSupplierNotifications,
+  useNotificationsLastSeen,
+} from "@/lib/queries/notifications"
+import { formatDistanceToNow } from "date-fns"
+import { vi } from "date-fns/locale"
 import Image from "next/image"
 
 type NavItem = {
@@ -101,6 +108,10 @@ function getInitials(name: string): string {
     .toUpperCase()
 }
 
+function formatRelative(iso: string): string {
+  return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: vi })
+}
+
 export function SiteHeader() {
   const pathname = usePathname() ?? "/"
   const router = useRouter()
@@ -111,6 +122,7 @@ export function SiteHeader() {
   const [accountOpen, setAccountOpen] = useState(false)
   const [wishlistOpen, setWishlistOpen] = useState(false)
   const [supplierOrdersOpen, setSupplierOrdersOpen] = useState(false)
+  const [notifOpen, setNotifOpen] = useState(false)
   const [supplierDropdownOpen, setSupplierDropdownOpen] = useState(false)
   const [adminDropdownOpen, setAdminDropdownOpen] = useState(false)
   const [adminSheetOpen, setAdminSheetOpen] = useState(false)
@@ -134,6 +146,11 @@ export function SiteHeader() {
     (p) => p.uploadStatus === "pending"
   )
   const pendingProductCount = pendingProducts.length
+
+  // Bell notifications cho supplier (admin approve/reject sản phẩm)
+  const { data: notifications = [] } = useGetSupplierNotifications()
+  const { isUnread, markAllSeen } = useNotificationsLastSeen()
+  const unreadNotifCount = notifications.filter((n) => isUnread(n.reviewedAt)).length
 
   const hydrated = useAuthStore((s) => s.hydrated)
   const authed = hydrated && isAuthenticated && !!user
@@ -579,6 +596,124 @@ export function SiteHeader() {
           {/* Supplier pending orders — Desktop: Dropdown */}
           {authed && user?.role === "supplier" && (
             <>
+              {/* ── Bell — Thông báo admin duyệt/từ chối sản phẩm ── */}
+              <DropdownMenu
+                open={notifOpen}
+                onOpenChange={(open) => {
+                  setNotifOpen(open)
+                  if (open) markAllSeen()
+                }}
+              >
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Thông báo"
+                    className="relative hidden size-10 cursor-pointer rounded-full text-[oklch(0.34_0.03_55)] hover:bg-[oklch(0.91_0.022_75)] hover:text-[oklch(0.6_0.062_60)] lg:inline-flex"
+                  >
+                    <Bell className="size-5" strokeWidth={1.4} />
+                    {unreadNotifCount > 0 && (
+                      <span className="absolute -top-0.5 -right-0.5 flex size-4 items-center justify-center rounded-full bg-[oklch(0.55_0.18_28)] text-[10px] font-bold text-white ring-2 ring-[oklch(0.965_0.012_78)]">
+                        {unreadNotifCount > 9 ? "9+" : unreadNotifCount}
+                      </span>
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  sideOffset={10}
+                  className="w-80 rounded-md border border-[oklch(0.86_0.018_70)] bg-[oklch(0.99_0.008_78)] p-0 shadow-[0_24px_60px_-20px_oklch(0.34_0.03_55/0.3)]"
+                >
+                  <div className="flex items-center justify-between border-b border-[oklch(0.9_0.014_72)] px-4 py-3">
+                    <p className="text-[10px] font-semibold tracking-[0.28em] text-[oklch(0.4_0.024_55)] uppercase">
+                      ✦ Thông báo
+                    </p>
+                    {notifications.length > 0 && (
+                      <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                        {notifications.length} tin
+                      </span>
+                    )}
+                  </div>
+                  {notifications.length === 0 ? (
+                    <div className="flex flex-col items-center gap-2 py-10 text-center">
+                      <Bell
+                        className="size-8 text-[oklch(0.78_0.04_70)]"
+                        strokeWidth={1.2}
+                      />
+                      <p className="text-[12px] text-[oklch(0.55_0.024_60)]">
+                        Chưa có thông báo
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {notifications.map((n) => {
+                        const unread = isUnread(n.reviewedAt)
+                        const isApproved = n.type === "approved"
+                        return (
+                          <Link
+                            key={n.id}
+                            href="/supplier"
+                            onClick={() => setNotifOpen(false)}
+                            className={cn(
+                              "relative flex items-start gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 pl-5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]",
+                              unread && "bg-[oklch(0.96_0.012_78)]",
+                            )}
+                          >
+                            {unread && (
+                              <span className="absolute top-3.5 left-1.5 size-1.5 rounded-full bg-[oklch(0.6_0.062_60)]" />
+                            )}
+                            <div className="size-12 shrink-0 overflow-hidden rounded-md bg-[oklch(0.94_0.014_75)]">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={n.productSrc}
+                                alt={n.productName}
+                                className="size-full object-cover"
+                              />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-[13px] font-medium text-[oklch(0.18_0.014_55)]">
+                                {n.productName}
+                              </p>
+                              <p className="mt-0.5 flex items-center gap-1.5">
+                                <span
+                                  className={cn(
+                                    "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
+                                    isApproved
+                                      ? "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]"
+                                      : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]",
+                                  )}
+                                >
+                                  {isApproved ? "Được duyệt" : "Từ chối"}
+                                </span>
+                                <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
+                                  {formatRelative(n.reviewedAt)}
+                                </span>
+                              </p>
+                              {!isApproved && n.rejectReason && (
+                                <p className="mt-1 truncate text-[11px] italic text-[oklch(0.55_0.024_60)]">
+                                  Lý do: {n.rejectReason}
+                                </p>
+                              )}
+                            </div>
+                          </Link>
+                        )
+                      })}
+                    </div>
+                  )}
+                  {notifications.length > 0 && (
+                    <div className="border-t border-[oklch(0.9_0.014_72)] p-2">
+                      <Link
+                        href="/supplier"
+                        onClick={() => setNotifOpen(false)}
+                        className="flex w-full items-center justify-center rounded-sm py-2 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
+                      >
+                        Xem tất cả →
+                      </Link>
+                    </div>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
               <DropdownMenu
                 open={supplierDropdownOpen}
                 onOpenChange={setSupplierDropdownOpen}
