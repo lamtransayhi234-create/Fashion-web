@@ -293,34 +293,39 @@ export default function SupplierPage() {
     form.color.trim() &&
     !uploading
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     if (!canSubmit || !form.category || !form.type) return
     setSubmitting(true)
-    submitProduct(
-      {
-        src: form.imgUrl,
-        name: form.name.trim(),
-        brandPrice: Number(form.brandPrice.replace(/\D/g, "")),
-        rentalPrice: Number(form.rentalPrice.replace(/\D/g, "")),
-        description: form.description.trim(),
-        category: form.category as ProductCategory,
-        type: form.type as ProductType,
-        sizes: form.sizes,
-        color: form.color.trim(),
-        tags: form.tags,
-      },
-      {
-        id: safeUser.id,
-        name: safeUser.name,
-        shopName: (safeUser as { shopName?: string }).shopName,
-      }
-    )
-    setForm(EMPTY_FORM)
-    setTagInput("")
-    setSubmitting(false)
-    setSuccessDialog(true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    try {
+      await submitProduct(
+        {
+          src: form.imgUrl,
+          name: form.name.trim(),
+          brandPrice: Number(form.brandPrice.replace(/\D/g, "")),
+          rentalPrice: Number(form.rentalPrice.replace(/\D/g, "")),
+          description: form.description.trim(),
+          category: form.category as ProductCategory,
+          type: form.type as ProductType,
+          sizes: form.sizes,
+          color: form.color.trim(),
+          tags: form.tags,
+        },
+        {
+          id: safeUser.id,
+          name: safeUser.name,
+          shopName: (safeUser as { shopName?: string }).shopName,
+        }
+      )
+      setForm(EMPTY_FORM)
+      setTagInput("")
+      setSuccessDialog(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (err) {
+      console.error("submitProduct failed:", err)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const availableSizes: ProductSize[] =
