@@ -58,7 +58,7 @@ export function ProductCard({
             className="absolute inset-0 bg-[oklch(0.18_0.014_55/0.28)] opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           />
 
-          {isCustomer && (
+          {/* {isCustomer && (
             <button
               type="button"
               aria-label={isWishlisted ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
@@ -80,7 +80,7 @@ export function ProductCard({
                 strokeWidth={1.8}
               />
             </button>
-          )}
+          )} */}
 
           <div className="absolute top-4 left-4 z-10 flex items-center gap-1.5 rounded-sm bg-[oklch(0.99_0.008_78)]/95 px-3 py-1 text-[10px] font-semibold tracking-[0.18em] text-[oklch(0.34_0.03_55)] uppercase backdrop-blur-md">
             <Sparkles className="size-3 fill-[oklch(0.78_0.04_70)] stroke-[oklch(0.6_0.062_60)]" />
