@@ -22,6 +22,7 @@ import {
 
 import { useOrderStore } from "@/lib/store/order-store"
 import { useAuthStore } from "@/lib/store/auth-store"
+import { useAddOrder } from "@/lib/queries/orders/useAddOrder"
 import { Button } from "@/components/ui/button"
 
 // ─── Constants ────────────────────────────────────────────────────────────────
@@ -53,7 +54,7 @@ export default function PaymentPage() {
   const router = useRouter()
   const { pending, clear } = useOrderStore()
   const user = useAuthStore((s) => s.user)
-  const addOrder = useAuthStore((s) => s.addOrder)
+  const addOrderMutation = useAddOrder()
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
 
@@ -126,7 +127,7 @@ export default function PaymentPage() {
     setSubmitting(true)
     setSubmitError(null)
     try {
-      await addOrder({
+      await addOrderMutation.mutateAsync({
         productId: pending.productId,
         providerId: pending.providerId,
         productName: pending.productName,

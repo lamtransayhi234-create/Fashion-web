@@ -27,7 +27,10 @@ import {
 } from "@/lib/data/products"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/store/auth-store"
-import { useProductStore } from "@/lib/store/product-store"
+import { useGetProducts } from "@/lib/queries/products/useGetProducts"
+import { useGetProviders } from "@/lib/queries/providers/useGetProviders"
+import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
+import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -563,7 +566,8 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 function ProductsInner() {
-  const allProducts = useProductStore((s) => s.allProducts)
+  const { data: allProducts = [], isLoading: productsLoading } = useGetProducts()
+  const { data: dynamicProviders = [] } = useGetProviders()
   const searchParams = useSearchParams()
   const router = useRouter()
   const keyword = searchParams.get("keyword")?.trim() ?? ""
@@ -581,8 +585,8 @@ function ProductsInner() {
 
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
-  const whitelist = useAuthStore((s) => s.whitelist)
+  const toggleWhitelist = useToggleWhitelist()
+  const { data: whitelist = [] } = useGetWhitelist()
   const isCustomer = isAuthenticated && user?.role === "user"
 
   const [pending, setPending] = useState<Filters>(initFilters)
@@ -1112,7 +1116,7 @@ function ProductsInner() {
                                 onClick={(e) => {
                                   e.preventDefault()
                                   e.stopPropagation()
-                                  toggleWhitelist(product)
+                                  toggleWhitelist.mutate(product)
                                 }}
                                 className="absolute top-2.5 right-2.5 flex size-8 cursor-pointer items-center justify-center rounded-full transition-all duration-200"
                                 style={{

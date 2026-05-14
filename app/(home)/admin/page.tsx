@@ -13,7 +13,9 @@ import {
 } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth-store"
-import { useProductStore } from "@/lib/store/product-store"
+import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
+import { useApproveProduct } from "@/lib/queries/products/useApproveProduct"
+import { useRejectProduct } from "@/lib/queries/products/useRejectProduct"
 import type { SubmittedProduct } from "@/lib/data/products"
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -264,8 +266,10 @@ function Dialog({
 
 export default function AdminPage() {
   const router = useRouter()
-  const { user } = useAuthStore()
-  const { submittedProducts, approveProduct, rejectProduct } = useProductStore()
+  const user = useAuthStore((s) => s.user)
+  const { data: submittedProducts = [] } = useGetSubmissions()
+  const approveProductMutation = useApproveProduct()
+  const rejectProductMutation = useRejectProduct()
 
   const hydrated = useSyncExternalStore(
     (cb) => useAuthStore.persist.onFinishHydration(cb),
@@ -313,8 +317,10 @@ export default function AdminPage() {
 
   async function confirmApprove() {
     if (!approveDialog.id) return
+    const sub = submittedProducts.find((s) => s.id === approveDialog.id)
+    if (!sub) return
     try {
-      await approveProduct(approveDialog.id)
+      await approveProductMutation.mutateAsync(sub)
       setApproveDialog({ open: false, id: null })
       showToast("Sản phẩm đã được duyệt và xuất hiện trên shop!")
     } catch (err) {
@@ -326,7 +332,10 @@ export default function AdminPage() {
   async function confirmReject() {
     if (!rejectDialog.id || !rejectDialog.reason.trim()) return
     try {
-      await rejectProduct(rejectDialog.id, rejectDialog.reason.trim())
+      await rejectProductMutation.mutateAsync({
+        id: rejectDialog.id,
+        reason: rejectDialog.reason.trim(),
+      })
       setRejectDialog({ open: false, id: null, reason: "" })
       showToast("Đã từ chối sản phẩm.")
     } catch (err) {

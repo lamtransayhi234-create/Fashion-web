@@ -5,6 +5,8 @@ import { ArrowUpRight, Heart, MapPin, Sparkles, Star } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { useAuthStore } from "@/lib/store/auth-store"
+import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
+import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
 import type { Product } from "@/lib/data/products"
 import Link from "next/link"
 
@@ -36,8 +38,8 @@ export function ProductCard({
 }: ProductCardProps) {
   const user = useAuthStore((s) => s.user)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
-  const whitelist = useAuthStore((s) => s.whitelist)
+  const { data: whitelist = [] } = useGetWhitelist()
+  const toggleWhitelist = useToggleWhitelist()
   const isCustomer = isAuthenticated && user?.role === "user"
   const isWishlisted = whitelist.some((w) => w.id === product.id)
 
@@ -60,7 +62,7 @@ export function ProductCard({
             <button
               type="button"
               aria-label={isWishlisted ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
-              onClick={() => { void toggleWhitelist(product).catch((e) => console.error(e)) }}
+              onClick={() => toggleWhitelist.mutate(product)}
               className="absolute top-4 right-4 z-10 flex size-10 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 hover:scale-110"
               style={{
                 background: isWishlisted

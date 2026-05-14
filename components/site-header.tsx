@@ -51,7 +51,10 @@ import {
 } from "@/components/ui/sheet"
 import { cn } from "@/lib/utils"
 import { ROLE_LABEL, useAuthStore } from "@/lib/store/auth-store"
-import { useProductStore } from "@/lib/store/product-store"
+import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
+import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
+import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
+import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
 import Image from "next/image"
 
 type NavItem = {
@@ -123,16 +126,16 @@ export function SiteHeader() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
-  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
-  const wishlist = useAuthStore((s) => s.whitelist)
-  const orders = useAuthStore((s) => s.orders)
+  const toggleWhitelist = useToggleWhitelist()
+  const { data: wishlist = [] } = useGetWhitelist()
+  const { data: orders = [] } = useGetOrders()
   const pendingOrders =
     user?.role === "supplier"
       ? orders.filter((o) => o.providerId === user.id && o.status === "pending")
       : []
   const pendingOrderCount = pendingOrders.length
 
-  const submittedProducts = useProductStore((s) => s.submittedProducts)
+  const { data: submittedProducts = [] } = useGetSubmissions()
   const pendingProducts = submittedProducts.filter(
     (p) => p.uploadStatus === "pending"
   )
@@ -1070,7 +1073,7 @@ export function SiteHeader() {
                           </Link>
                           <button
                             type="button"
-                            onClick={() => toggleWhitelist(product)}
+                            onClick={() => toggleWhitelist.mutate(product)}
                             className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
                             aria-label="Bỏ yêu thích"
                           >
@@ -1174,7 +1177,7 @@ export function SiteHeader() {
                           </SheetClose>
                           <button
                             type="button"
-                            onClick={() => toggleWhitelist(product)}
+                            onClick={() => toggleWhitelist.mutate(product)}
                             className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
                             aria-label="Bỏ yêu thích"
                           >

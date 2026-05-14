@@ -16,7 +16,8 @@ import {
 } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth-store"
-import { useProductStore } from "@/lib/store/product-store"
+import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
+import { useSubmitProduct } from "@/lib/queries/products/useSubmitProduct"
 import type {
   ProductCategory,
   ProductType,
@@ -182,8 +183,9 @@ function FieldLabel({
 
 export default function SupplierPage() {
   const router = useRouter()
-  const { user } = useAuthStore()
-  const { submittedProducts, submitProduct } = useProductStore()
+  const user = useAuthStore((s) => s.user)
+  const { data: submittedProducts = [] } = useGetSubmissions()
+  const submitProductMutation = useSubmitProduct()
 
   const hydrated = useSyncExternalStore(
     (cb) => useAuthStore.persist.onFinishHydration(cb),
@@ -298,8 +300,8 @@ export default function SupplierPage() {
     if (!canSubmit || !form.category || !form.type) return
     setSubmitting(true)
     try {
-      await submitProduct(
-        {
+      await submitProductMutation.mutateAsync({
+        data: {
           src: form.imgUrl,
           name: form.name.trim(),
           brandPrice: Number(form.brandPrice.replace(/\D/g, "")),
@@ -311,12 +313,12 @@ export default function SupplierPage() {
           color: form.color.trim(),
           tags: form.tags,
         },
-        {
+        supplier: {
           id: safeUser.id,
           name: safeUser.name,
           shopName: (safeUser as { shopName?: string }).shopName,
-        }
-      )
+        },
+      })
       setForm(EMPTY_FORM)
       setTagInput("")
       setSuccessDialog(true)

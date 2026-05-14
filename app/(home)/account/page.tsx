@@ -21,6 +21,8 @@ import {
 } from "lucide-react"
 
 import { useAuthStore, ROLE_LABEL } from "@/lib/store/auth-store"
+import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
+import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
 import { Button } from "@/components/ui/button"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 
@@ -261,8 +263,8 @@ export default function AccountPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
   const updateProfile = useAuthStore((s) => s.updateProfile)
-  const orders = useAuthStore((s) => s.orders)
-  const whitelist = useAuthStore((s) => s.whitelist)
+  const { data: orders = [] } = useGetOrders()
+  const { data: whitelist = [] } = useGetWhitelist()
   const hydrated = useSyncExternalStore(
     (cb) => useAuthStore.persist.onFinishHydration(cb),
     () => useAuthStore.persist.hasHydrated(),

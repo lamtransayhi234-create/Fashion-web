@@ -20,6 +20,8 @@ import {
   type Order,
   type OrderStatus,
 } from "@/lib/store/auth-store"
+import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
+import { useUpdateOrderStatus } from "@/lib/queries/orders/useUpdateOrderStatus"
 import {
   Select,
   SelectContent,
@@ -250,8 +252,10 @@ function OrderCard({
 export default function SupplierOrdersPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
-  const orders = useAuthStore((s) => s.orders)
-  const updateOrderStatus = useAuthStore((s) => s.updateOrderStatus)
+  const { data: orders = [] } = useGetOrders("shop")
+  const updateOrderStatusMutation = useUpdateOrderStatus()
+  const updateOrderStatus = (id: string, status: OrderStatus) =>
+    updateOrderStatusMutation.mutate({ id, status })
   const [filter, setFilter] = useState<DisplayStatus | "all">("all")
   const [toast, setToast] = useState<string | null>(null)
 
@@ -300,9 +304,7 @@ export default function SupplierOrdersPage() {
   ).length
 
   function handleStatusChange(orderId: string, status: OrderStatus) {
-    void updateOrderStatus(orderId, status).catch((err) => {
-      console.error("updateOrderStatus failed:", err)
-    })
+    updateOrderStatus(orderId, status)
     const labels: Record<string, string> = {
       confirmed: "Đã xác nhận đơn thuê!",
       completed: "Đã đánh dấu hoàn thành!",

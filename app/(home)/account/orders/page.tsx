@@ -17,6 +17,7 @@ import {
 } from "lucide-react"
 
 import { useAuthStore, type Order } from "@/lib/store/auth-store"
+import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
 import { Button } from "@/components/ui/button"
 
 // ─── Rental status ────────────────────────────────────────────────────────────
@@ -114,7 +115,7 @@ export default function OrdersPage() {
     return null
   }
 
-  const orders = useAuthStore.getState().orders
+  const { data: orders = [] } = useGetOrders("mine")
   const activeCount = orders.filter((o) => getRentalStatus(o) === "active").length
 
   const FILTER_TABS: { key: RentalStatus | "all"; label: string }[] = [

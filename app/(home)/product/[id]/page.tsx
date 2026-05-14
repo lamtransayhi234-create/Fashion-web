@@ -2,7 +2,6 @@
 
 import { notFound } from "next/navigation"
 import { useParams } from "next/navigation"
-import { useSyncExternalStore } from "react"
 import Link from "next/link"
 import {
   ChevronRight,
@@ -18,9 +17,9 @@ import {
   Truck,
 } from "lucide-react"
 
-import { providers } from "@/lib/data/products"
-import { useProductStore } from "@/lib/store/product-store"
-import { useAuthStore } from "@/lib/store/auth-store"
+import { useGetProductDetail } from "@/lib/queries/products/useGetProductDetail"
+import { useGetProducts } from "@/lib/queries/products/useGetProducts"
+import { useGetProviders } from "@/lib/queries/providers/useGetProviders"
 import { ProductImageZoom } from "@/components/product-image-zoom"
 import { ProductRentalForm } from "@/components/product-rental-form"
 import { ProductCard } from "@/components/product-card"
@@ -29,24 +28,16 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 export default function ProductDetailPage() {
   const params = useParams()
   const id = params?.id as string
-  const allProducts = useProductStore((s) => s.allProducts)
-  const dynamicProviders = useProductStore((s) => s.dynamicProviders)
-  const users = useAuthStore((s) => s.users)
-  const hydrated = useSyncExternalStore(
-    (cb) => useProductStore.persist.onFinishHydration(cb),
-    () => useProductStore.persist.hasHydrated(),
-    () => false
-  )
+  const { data: product, isLoading: detailLoading, isError } = useGetProductDetail(id)
+  const { data: allProducts = [] } = useGetProducts()
+  const { data: providers = [] } = useGetProviders()
 
-  if (!hydrated) return <div className="min-h-screen bg-[oklch(0.962_0.012_78)]" />
+  if (detailLoading) return <div className="min-h-screen bg-[oklch(0.962_0.012_78)]" />
 
-  const product = allProducts.find((p) => p.id === id)
-  if (!product) return notFound()
+  if (isError || !product) return notFound()
 
-  const allProviders = [...providers, ...dynamicProviders]
-  const provider = allProviders.find((p) => p.id === product.providerId)
-  const supplierUser = users.find((u) => u.id === product.providerId)
-  const supplierPhone = supplierUser?.phone
+  const provider = providers.find((p) => p.id === product.providerId)
+  const supplierPhone: string | undefined = undefined
   const isAvailable = product.status === "available"
   const savingPct = Math.round(
     (1 - product.rentalPrice / product.brandPrice) * 100
@@ -334,7 +325,7 @@ export default function ProductDetailPage() {
 
             <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
               {similar.map((p) => {
-                const prov = allProviders.find((v) => v.id === p.providerId)
+                const prov = providers.find((v) => v.id === p.providerId)
                 return (
                   <ProductCard
                     key={p.id}
