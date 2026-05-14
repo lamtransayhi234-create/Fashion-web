@@ -9,7 +9,8 @@
     "start": "next start",
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "gen:types": "supabase gen types typescript --project-id=msjssfmhhdmwapddtgmw --schema=public > lib/supabase/types.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
