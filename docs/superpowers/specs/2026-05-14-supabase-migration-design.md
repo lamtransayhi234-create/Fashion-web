@@ -13,7 +13,7 @@ Chuyển toàn bộ persistence layer của StyleLoop từ Zustand `persist` (lo
 - Backend: **Supabase** (Postgres SQL hợp với data quan hệ + RLS cho role-based access)
 - Scope: **Full migrate** — Auth + Products + Submissions + Orders + Whitelist
 - Auth: **Supabase Auth chuẩn** (email/password, tắt email confirmation cho dễ dev)
-- Seed: **Toàn bộ mock data** (9 user + ~30 products)
+- Seed: **5 demo account** (2 user + 2 supplier + 1 admin) + toàn bộ mock products (~30), products được remap đều về 2 supplier seed. Tài khoản khác user tự tạo qua UI register.
 - Storage: **Có** — supplier upload ảnh thật thay vì paste URL
 
 ---
@@ -339,15 +339,44 @@ Path convention: `product-images/{supplier_id}/{uuid}-{filename}` — RLS lấy 
 
 `supabase/seed.ts` — Node script chạy với `SUPABASE_SERVICE_ROLE_KEY`:
 
-1. Đọc `MOCK_USERS`, `MOCK_ADMINS`, `MOCK_SUPPLIERS` từ `lib/store/auth-store.ts`
-2. Với mỗi mock account: gọi Admin API `supabase.auth.admin.createUser({ email, password, email_confirm: true, user_metadata: { name, role, shop_name, phone } })`
-   - Trigger tự tạo profile row tương ứng
-3. Đọc `products` từ `lib/data/products.ts` → batch insert vào `products` table, set `provider_id` mapping từ `s-001 → uuid mới của supplier 1`...
-   - Cần lookup map `mock-id → new-uuid` sau khi tạo user (vì Supabase Auth sinh uuid mới)
+### 7.1 Demo accounts (5 accounts cố định)
+
+| Mock ID | Role | Email | Password | Tên / Shop |
+|---|---|---|---|---|
+| `u-001` | user | `user1@styleloop.vn` | `user123` | Linh Nguyễn |
+| `u-002` | user | `user2@styleloop.vn` | `user123` | Trang Phạm |
+| `a-001` | admin | `admin@styleloop.vn` | `admin123` | Vincent Lê |
+| `s-001` | supplier | `supplier1@styleloop.vn` | `supplier123` | Bảo Lê / *Bảo Closet* |
+| `s-002` | supplier | `supplier2@styleloop.vn` | `supplier123` | Yến Vũ / *Yến Vintage* |
+
+Các tài khoản còn lại (user3, supplier3..5) trong MOCK arrays cũ **không seed** — user tự tạo thêm qua UI register nếu cần.
+
+### 7.2 Script logic
+
+1. Tạo 5 auth user qua Admin API:
+   ```ts
+   supabase.auth.admin.createUser({
+     email, password,
+     email_confirm: true,
+     user_metadata: { mock_id, name, role, shop_name, phone, address, avatar }
+   })
+   ```
+   - Trigger `handle_new_user()` tự tạo profile tương ứng
+   - Lưu `user_metadata.mock_id` để mapping ở bước sau
+
+2. Build map `mock_id → uuid_mới`. 2 supplier có id mới là `S1_UUID`, `S2_UUID`.
+
+3. Đọc `products` từ `lib/data/products.ts`, **remap `providerId`** về 2 supplier seed bằng round-robin theo `mock_supplier_id`:
+   - `s-001` → `S1_UUID`
+   - `s-002` → `S2_UUID`
+   - `s-003`, `s-004`, `s-005` → phân bổ luân phiên về `S1_UUID` / `S2_UUID` (vd: s-003→S1, s-004→S2, s-005→S1)
+   - Mục đích: tất cả ~30 products có valid FK, mỗi supplier seed có data hiển thị trên trang shop
+
+4. Batch insert ~30 products vào `products` table với `provider_id` đã remap.
 
 Chạy: `pnpm tsx supabase/seed.ts`
 
-**Idempotent:** Script check email exists trước khi insert; nếu rerun thì update thay vì duplicate.
+**Idempotent:** Script check email exists (qua `supabase.auth.admin.listUsers`) trước khi tạo; nếu đã tồn tại thì skip user, vẫn upsert products theo tên (unique check).
 
 ---
 
@@ -359,7 +388,7 @@ Làm tuần tự, mỗi phase test xong mới qua phase sau:
 |---|---|---|
 | 1. **Setup** | Tạo project Supabase, install `@supabase/supabase-js` + `@supabase/ssr`, env vars, file `lib/supabase/client.ts` + `server.ts` | `supabase.from('_').select()` chạy không lỗi connection |
 | 2. **Schema + RLS** | Viết `supabase/migrations/0001_init.sql`, apply lên project. Generate types: `pnpm dlx supabase gen types typescript --project-id=... > lib/supabase/types.ts` | Bảng + policies hiện trong dashboard |
-| 3. **Seed** | Viết `supabase/seed.ts`, chạy seed | Đếm rows: 9 profiles, ~30 products |
+| 3. **Seed** | Viết `supabase/seed.ts`, chạy seed | Đếm rows: 5 profiles (2 user + 2 supplier + 1 admin), ~30 products phân bổ về 2 supplier |
 | 4. **Auth migrate** | Thay `auth-store.ts` Zustand: bỏ `persist`, dùng Supabase Auth. Update `register/page.tsx`, `login/page.tsx`, `account/page.tsx`, các nơi gọi `useAuthStore.persist.*` | Login bằng `user1@styleloop.vn` / `user123` thành công, refresh page vẫn login |
 | 5. **Products + Submissions** | Thay `product-store.ts`. Update `app/(home)/products/`, `product/[id]/`, `admin/`, `supplier/` để gọi store async | List products hiện đúng, supplier submit pending, admin approve → xuất hiện trong shop |
 | 6. **Orders + Whitelist** | Phần logic order/whitelist trong `auth-store` chuyển sang gọi Supabase. Update `payment/`, `account/orders/`, `account/ordered/`, like button | Đặt thuê 1 sản phẩm → record trong DB; like → row trong `whitelist` |
