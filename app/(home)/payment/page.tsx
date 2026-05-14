@@ -52,7 +52,10 @@ const PAYMENT_METHODS = [
 export default function PaymentPage() {
   const router = useRouter()
   const { pending, clear } = useOrderStore()
-  const { user, addOrder } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const addOrder = useAuthStore((s) => s.addOrder)
+  const [submitting, setSubmitting] = useState(false)
+  const [submitError, setSubmitError] = useState<string | null>(null)
 
   const [address, setAddress] = useState("")
   const [phone, setPhone] = useState("")
@@ -118,34 +121,42 @@ export default function PaymentPage() {
   // QR URL — demo placeholder using qrserver.com
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=STYLELOOP-${grandTotal}&color=1a0e05&bgcolor=f5f0e8&margin=12`
 
-  function handleConfirm() {
+  async function handleConfirm() {
     if (!isComplete || !paymentMethod || !selectedMethod || !pending) return
-    // Save order to auth store
-    addOrder({
-      productId: pending.productId,
-      providerId: pending.providerId,
-      productName: pending.productName,
-      productSrc: pending.productSrc,
-      productType: pending.productType,
-      size: pending.size,
-      color: pending.color,
-      fromDate: pending.fromDate,
-      toDate: pending.toDate,
-      nights: pending.nights,
-      rentalPricePerDay: pending.rentalPricePerDay,
-      total: pending.total,
-      deposit,
-      address,
-      phone: phone.trim(),
-      paymentMethod,
-      paymentMethodLabel: selectedMethod.label,
-      note,
-      status: "pending",
-    })
-    clear()
-    setShowQR(false)
-    setSubmitted(true)
-    window.scrollTo({ top: 0, behavior: "smooth" })
+    setSubmitting(true)
+    setSubmitError(null)
+    try {
+      await addOrder({
+        productId: pending.productId,
+        providerId: pending.providerId,
+        productName: pending.productName,
+        productSrc: pending.productSrc,
+        productType: pending.productType,
+        size: pending.size,
+        color: pending.color,
+        fromDate: pending.fromDate,
+        toDate: pending.toDate,
+        nights: pending.nights,
+        rentalPricePerDay: pending.rentalPricePerDay,
+        total: pending.total,
+        deposit,
+        address,
+        phone: phone.trim(),
+        paymentMethod,
+        paymentMethodLabel: selectedMethod.label,
+        note,
+        status: "pending",
+      })
+      clear()
+      setShowQR(false)
+      setSubmitted(true)
+      window.scrollTo({ top: 0, behavior: "smooth" })
+    } catch (err) {
+      console.error("addOrder failed:", err)
+      setSubmitError((err as Error).message ?? "Đặt đơn thất bại, vui lòng thử lại.")
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   // ── Main layout ──

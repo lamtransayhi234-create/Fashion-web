@@ -300,7 +300,9 @@ export default function SupplierOrdersPage() {
   ).length
 
   function handleStatusChange(orderId: string, status: OrderStatus) {
-    updateOrderStatus(orderId, status)
+    void updateOrderStatus(orderId, status).catch((err) => {
+      console.error("updateOrderStatus failed:", err)
+    })
     const labels: Record<string, string> = {
       confirmed: "Đã xác nhận đơn thuê!",
       completed: "Đã đánh dấu hoàn thành!",
