@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Playfair_Display } from "next/font/google"
 
 import "./globals.css"
+import { AuthInit } from "@/components/auth-init"
 import { ThemeProvider } from "@/components/theme-provider"
 import { cn } from "@/lib/utils"
 
@@ -43,7 +44,9 @@ export default function RootLayout({
           aria-hidden
           className="bg-noise pointer-events-none fixed inset-0 -z-10 opacity-[0.025] mix-blend-multiply"
         />
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <AuthInit>{children}</AuthInit>
+        </ThemeProvider>
       </body>
     </html>
   )
