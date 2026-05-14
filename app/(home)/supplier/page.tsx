@@ -1,10 +1,9 @@
 "use client"
 
-import { useState, useSyncExternalStore, useRef } from "react"
+import { useState, useSyncExternalStore } from "react"
 import { useRouter } from "next/navigation"
 import {
   Package,
-  Upload,
   X,
   CheckCircle2,
   Clock,
@@ -19,6 +18,7 @@ import { useAuthStore } from "@/lib/store/auth-store"
 import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
 import { useSubmitProduct } from "@/lib/queries/products/useSubmitProduct"
 import { SupplierSkeleton } from "@/components/skeletons"
+import { ImageUploader } from "@/components/image-uploader"
 import type {
   ProductCategory,
   ProductType,
@@ -112,22 +112,6 @@ const TAG_SUGGESTIONS = [
   "Cưới hỏi",
 ]
 
-// ─── imgbb upload ─────────────────────────────────────────────────────────────
-
-const IMGBB_KEY = "caf2f6d885006dd9c666147aac14df9d"
-
-async function uploadToImgbb(file: File): Promise<string> {
-  const formData = new FormData()
-  formData.append("image", file)
-  const res = await fetch(`https://api.imgbb.com/1/upload?key=${IMGBB_KEY}`, {
-    method: "POST",
-    body: formData,
-  })
-  const json = await res.json()
-  if (!json.success) throw new Error("Upload thất bại")
-  return json.data.url as string
-}
-
 function fmt(n: number) {
   return new Intl.NumberFormat("vi-VN").format(n) + "đ"
 }
@@ -199,13 +183,10 @@ export default function SupplierPage() {
     "all" | "pending" | "approved" | "rejected"
   >("all")
   const [form, setForm] = useState<FormState>(EMPTY_FORM)
-  const [uploading, setUploading] = useState(false)
-  const [uploadError, setUploadError] = useState<string | null>(null)
   const [tagInput, setTagInput] = useState("")
   const [toast, setToast] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [successDialog, setSuccessDialog] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
 
   if (!hydrated || subsLoading) return <SupplierSkeleton />
   if (!user) {
@@ -221,24 +202,6 @@ export default function SupplierPage() {
   const myProducts = submittedProducts.filter(
     (p) => p.supplierId === safeUser.id
   )
-
-  // ── Image upload ──────────────────────────────────────────────────────────
-
-  async function handleFile(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    setUploading(true)
-    setUploadError(null)
-    try {
-      const url = await uploadToImgbb(file)
-      setForm((f) => ({ ...f, imgUrl: url }))
-    } catch {
-      setUploadError("Upload thất bại. Vui lòng thử lại.")
-    } finally {
-      setUploading(false)
-      if (fileRef.current) fileRef.current.value = ""
-    }
-  }
 
   // ── Category / type change ────────────────────────────────────────────────
 
@@ -293,8 +256,7 @@ export default function SupplierPage() {
     Number(form.rentalPrice) > 0 &&
     form.description.trim() &&
     form.sizes.length > 0 &&
-    form.color.trim() &&
-    !uploading
+    form.color.trim()
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -726,131 +688,15 @@ export default function SupplierPage() {
         {/* ── Tab 2: Form đăng sản phẩm ── */}
         {tab === "form" && (
           <form onSubmit={handleSubmit}>
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/*"
-              hidden
-              onChange={handleFile}
-            />
-
             <div className="flex items-start gap-8">
               {/* ── CỘT TRÁI: Image upload ── */}
               <div className="sticky top-24 w-72 shrink-0">
-                {/* Upload zone */}
-                <button
-                  type="button"
-                  onClick={() => fileRef.current?.click()}
-                  disabled={uploading}
-                  className="group relative w-full overflow-hidden rounded-md transition-all duration-300 disabled:cursor-not-allowed"
-                  style={{
-                    aspectRatio: "3/4",
-                    background: form.imgUrl ? "transparent" : TK.muted,
-                    border: form.imgUrl ? "none" : `2px dashed ${TK.border}`,
-                  }}
-                >
-                  {/* Preview */}
-                  {form.imgUrl && !uploading && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={form.imgUrl}
-                      alt="preview"
-                      className="size-full object-cover"
-                    />
-                  )}
-
-                  {/* Uploading overlay */}
-                  {uploading && (
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-3"
-                      style={{ background: TK.muted }}
-                    >
-                      <Loader2
-                        className="size-8 animate-spin"
-                        style={{ color: TK.camel }}
-                      />
-                      <span
-                        className="text-[12px] font-medium tracking-[0.14em] uppercase"
-                        style={{ color: TK.sub }}
-                      >
-                        Đang tải lên...
-                      </span>
-                    </div>
-                  )}
-
-                  {/* Empty state */}
-                  {!form.imgUrl && !uploading && (
-                    <div className="flex h-full flex-col items-center justify-center gap-4 p-6 text-center">
-                      <div
-                        className="flex size-16 items-center justify-center rounded-full transition-all duration-300 group-hover:scale-110"
-                        style={{ background: TK.sand }}
-                      >
-                        <Upload
-                          className="size-7"
-                          style={{ color: TK.camel }}
-                          strokeWidth={1.4}
-                        />
-                      </div>
-                      <div>
-                        <p
-                          className="text-[13px] font-semibold"
-                          style={{ color: TK.ink }}
-                        >
-                          Chọn ảnh sản phẩm
-                        </p>
-                        <p
-                          className="mt-1 text-[11px]"
-                          style={{ color: TK.sub }}
-                        >
-                          JPG, PNG, WEBP · Tối đa 32MB
-                        </p>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Hover overlay khi có ảnh */}
-                  {form.imgUrl && !uploading && (
-                    <div
-                      className="absolute inset-0 flex flex-col items-center justify-center gap-2 opacity-0 transition-all duration-300 group-hover:opacity-100"
-                      style={{ background: "oklch(0.18 0.014 55 / 0.55)" }}
-                    >
-                      <Upload className="size-6 text-white" strokeWidth={1.4} />
-                      <span className="text-[11px] font-semibold tracking-[0.16em] text-white uppercase">
-                        Đổi ảnh
-                      </span>
-                    </div>
-                  )}
-                </button>
-
-                {/* Actions dưới ảnh */}
-                <div className="mt-3 space-y-2">
-                  {uploadError && (
-                    <p
-                      className="rounded-md px-3 py-2 text-[12px] font-medium"
-                      style={{
-                        background: "oklch(0.95 0.04 25 / 0.4)",
-                        color: "oklch(0.5 0.12 25)",
-                      }}
-                    >
-                      {uploadError}
-                    </p>
-                  )}
-                  {form.imgUrl && !uploading && (
-                    <button
-                      type="button"
-                      onClick={() => setForm((f) => ({ ...f, imgUrl: "" }))}
-                      className="flex w-full items-center justify-center gap-1.5 rounded-full py-2 text-[11px] font-semibold tracking-[0.12em] uppercase transition-opacity hover:opacity-60"
-                      style={{
-                        border: `1px solid ${TK.border}`,
-                        color: TK.sub,
-                        background: "transparent",
-                      }}
-                    >
-                      <X className="size-3" strokeWidth={1.6} />
-                      Xoá ảnh
-                    </button>
-                  )}
-                </div>
+                {/* Supabase Storage uploader */}
+                <ImageUploader
+                  value={form.imgUrl}
+                  onChange={(url) => setForm((f) => ({ ...f, imgUrl: url }))}
+                  aspect="3 / 4"
+                />
 
                 {/* Progress indicator */}
                 <div className="mt-5 space-y-2">
