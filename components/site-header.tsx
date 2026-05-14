@@ -151,7 +151,9 @@ export function SiteHeader() {
   // Bell notifications cho supplier (admin approve/reject sản phẩm)
   const { data: notifications = [] } = useGetSupplierNotifications()
   const { isUnread, markAllSeen } = useNotificationsLastSeen()
-  const unreadNotifCount = notifications.filter((n) => isUnread(n.reviewedAt)).length
+  const unreadNotifCount = notifications.filter((n) =>
+    isUnread(n.reviewedAt)
+  ).length
 
   const hydrated = useAuthStore((s) => s.hydrated)
   const authed = hydrated && isAuthenticated && !!user
@@ -599,6 +601,7 @@ export function SiteHeader() {
             <>
               {/* ── Bell — Thông báo admin duyệt/từ chối sản phẩm ── */}
               <DropdownMenu
+                modal={false}
                 open={notifOpen}
                 onOpenChange={(open) => {
                   setNotifOpen(open)
@@ -657,7 +660,7 @@ export function SiteHeader() {
                             onClick={() => setNotifOpen(false)}
                             className={cn(
                               "relative flex items-start gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 pl-5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]",
-                              unread && "bg-[oklch(0.96_0.012_78)]",
+                              unread && "bg-[oklch(0.96_0.012_78)]"
                             )}
                           >
                             {unread && (
@@ -681,7 +684,7 @@ export function SiteHeader() {
                                     "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
                                     isApproved
                                       ? "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]"
-                                      : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]",
+                                      : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]"
                                   )}
                                 >
                                   {isApproved ? "Được duyệt" : "Từ chối"}
@@ -691,7 +694,7 @@ export function SiteHeader() {
                                 </span>
                               </p>
                               {!isApproved && n.rejectReason && (
-                                <p className="mt-1 truncate text-[11px] italic text-[oklch(0.55_0.024_60)]">
+                                <p className="mt-1 truncate text-[11px] text-[oklch(0.55_0.024_60)] italic">
                                   Lý do: {n.rejectReason}
                                 </p>
                               )}
@@ -782,7 +785,7 @@ export function SiteHeader() {
                               href="/supplier"
                               className={cn(
                                 "relative flex items-start gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 pl-6 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]",
-                                unread && "bg-[oklch(0.96_0.012_78)]",
+                                unread && "bg-[oklch(0.96_0.012_78)]"
                               )}
                             >
                               {unread && (
@@ -806,7 +809,7 @@ export function SiteHeader() {
                                       "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
                                       isApproved
                                         ? "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]"
-                                        : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]",
+                                        : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]"
                                     )}
                                   >
                                     {isApproved ? "Được duyệt" : "Từ chối"}
@@ -816,7 +819,7 @@ export function SiteHeader() {
                                   </span>
                                 </p>
                                 {!isApproved && n.rejectReason && (
-                                  <p className="mt-1 line-clamp-2 text-[11px] italic text-[oklch(0.55_0.024_60)]">
+                                  <p className="mt-1 line-clamp-2 text-[11px] text-[oklch(0.55_0.024_60)] italic">
                                     Lý do: {n.rejectReason}
                                   </p>
                                 )}
@@ -843,6 +846,7 @@ export function SiteHeader() {
               </Sheet>
 
               <DropdownMenu
+                modal={false}
                 open={supplierDropdownOpen}
                 onOpenChange={setSupplierDropdownOpen}
               >
@@ -1045,6 +1049,7 @@ export function SiteHeader() {
           {authed && user?.role === "admin" && (
             <>
               <DropdownMenu
+                modal={false}
                 open={adminDropdownOpen}
                 onOpenChange={setAdminDropdownOpen}
               >
@@ -1248,7 +1253,7 @@ export function SiteHeader() {
           {authed && user?.role === "user" && (
             <>
               {/* Desktop: Dropdown */}
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     variant="ghost"
@@ -1449,7 +1454,7 @@ export function SiteHeader() {
           {!authed ? (
             <div className="ml-1 flex items-center gap-1.5 sm:gap-2">
               {/* xs: dropdown */}
-              <DropdownMenu>
+              <DropdownMenu modal={false}>
                 <DropdownMenuTrigger asChild>
                   <Button
                     size="icon"
