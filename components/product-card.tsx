@@ -60,7 +60,7 @@ export function ProductCard({
             <button
               type="button"
               aria-label={isWishlisted ? "Bỏ yêu thích" : "Lưu vào yêu thích"}
-              onClick={() => toggleWhitelist(product)}
+              onClick={() => { void toggleWhitelist(product).catch((e) => console.error(e)) }}
               className="absolute top-4 right-4 z-10 flex size-10 cursor-pointer items-center justify-center rounded-full backdrop-blur-md transition-all duration-200 hover:scale-110"
               style={{
                 background: isWishlisted
