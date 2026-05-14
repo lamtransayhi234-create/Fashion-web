@@ -10,7 +10,8 @@
     "lint": "eslint",
     "format": "prettier --write \"**/*.{ts,tsx}\"",
     "typecheck": "tsc --noEmit",
-    "gen:types": "supabase gen types typescript --project-id=msjssfmhhdmwapddtgmw --schema=public > lib/supabase/types.ts"
+    "gen:types": "supabase gen types typescript --project-id=msjssfmhhdmwapddtgmw --schema=public > lib/supabase/types.ts",
+    "seed": "tsx --env-file=.env --env-file=.env.local supabase/seed.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.10.3",
