@@ -2303,6 +2303,90 @@ git commit -m "chore(supabase): cleanup mock data + compat shims"
 
 ---
 
+## Phase 9 — Deploy lên Vercel
+
+### Task 24: Production deployment
+
+> Supabase **không cần deploy riêng** — project Supabase đã chạy 24/7 ở cloud của họ. Task này chỉ config Vercel + Supabase Auth nhận diện được domain production.
+
+**Files:** (không có file code mới — toàn bộ là config dashboard)
+
+- [ ] **Step 1: Add env vars vào Vercel**
+
+Vercel Dashboard → chọn project → **Settings → Environment Variables**. Add 2 biến (apply cho cả Production + Preview + Development):
+
+| Name | Value |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | Copy từ `.env.local` |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Copy từ `.env.local` |
+
+> ⚠️ **TUYỆT ĐỐI KHÔNG** add `SUPABASE_SERVICE_ROLE_KEY` vào Vercel. Key này bypass toàn bộ RLS — chỉ dùng cho seed local. Nếu lộ ra production: bất kỳ ai có key đó đều đọc/sửa/xoá được mọi data.
+
+- [ ] **Step 2: Add Vercel domain vào Supabase Auth**
+
+Supabase Dashboard → **Authentication → URL Configuration**:
+
+- **Site URL**: `https://<your-app>.vercel.app` (đổi sang custom domain sau nếu có)
+- **Redirect URLs**: thêm 2 dòng:
+  ```
+  https://<your-app>.vercel.app/**
+  https://*-<your-vercel-team>.vercel.app/**
+  ```
+  (Dòng 2 cho preview deployments — mỗi PR có URL khác.)
+
+Bấm **Save**.
+
+- [ ] **Step 3: Verify dev server local vẫn chạy**
+
+```bash
+pnpm dev
+```
+
+Mở http://localhost:3000 → login `user1@styleloop.vn / user123` → OK.
+
+> Local vẫn dùng cùng 1 Supabase project nên dev và prod sẽ share data. Đây là chủ ý (cách đơn giản). Sau muốn tách, tạo Supabase project thứ 2 cho prod + apply lại migration + seed.
+
+Stop dev server.
+
+- [ ] **Step 4: Push lên Vercel**
+
+```bash
+git push origin main
+```
+
+Vercel auto-deploy. Vào Vercel dashboard → tab Deployments → đợi build xanh (~1-2 phút).
+
+- [ ] **Step 5: Smoke test production**
+
+Mở `https://<your-app>.vercel.app`:
+
+1. Trang chủ load OK, products hiện
+2. /login → bấm demo account "Khách thuê" → đăng nhập → redirect /, header có avatar
+3. /products → click 1 product → /payment → submit rental
+4. /account/orders → thấy order vừa tạo
+5. Logout → vào /supplier (chưa login) → redirect /login
+6. Login `supplier1@styleloop.vn` → /supplier → upload thử 1 ảnh
+
+Nếu fail bước nào, check:
+- **Login fail "Invalid redirect URL"** → quên Step 2
+- **"supabaseUrl is required"** → env vars chưa set hoặc Vercel chưa rebuild sau khi add env (Settings → Redeploy)
+- **500 error trên server route** → check Vercel logs (Functions tab)
+- **CORS error** → Supabase project URL không khớp env var
+
+- [ ] **Step 6: (Optional) Custom domain**
+
+Vercel Settings → Domains → add domain. Sau khi xong, quay lại Supabase Auth → URL Configuration → đổi Site URL sang domain mới, giữ Vercel domain trong Redirect URLs.
+
+- [ ] **Step 7: Commit (chỉ có CLAUDE.md update nếu có)**
+
+Không có file code mới. Nếu muốn ghi chú deploy:
+
+```bash
+git commit --allow-empty -m "chore: deployed to vercel + configured supabase auth urls"
+```
+
+---
+
 ## Self-review notes (đã check khi viết plan)
 
 **Spec coverage:**
