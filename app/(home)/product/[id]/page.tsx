@@ -24,6 +24,7 @@ import { ProductImageZoom } from "@/components/product-image-zoom"
 import { ProductRentalForm } from "@/components/product-rental-form"
 import { ProductCard } from "@/components/product-card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { ProductDetailSkeleton } from "@/components/skeletons"
 
 export default function ProductDetailPage() {
   const params = useParams()
@@ -32,7 +33,7 @@ export default function ProductDetailPage() {
   const { data: allProducts = [] } = useGetProducts()
   const { data: providers = [] } = useGetProviders()
 
-  if (detailLoading) return <div className="min-h-screen bg-[oklch(0.962_0.012_78)]" />
+  if (detailLoading) return <ProductDetailSkeleton />
 
   if (isError || !product) return notFound()
 

@@ -18,6 +18,7 @@ import {
 
 import { useAuthStore, type Order } from "@/lib/store/auth-store"
 import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
+import { AccountOrdersSkeleton } from "@/components/skeletons"
 import { Button } from "@/components/ui/button"
 
 // ─── Rental status ────────────────────────────────────────────────────────────
@@ -105,17 +106,17 @@ export default function OrdersPage() {
     () => useAuthStore.persist.hasHydrated(),
     () => false
   )
+  const { data: orders = [], isLoading: ordersLoading } = useGetOrders("mine")
 
   const [filter, setFilter] = useState<RentalStatus | "all">("all")
 
-  if (!hydrated) return null
+  if (!hydrated || ordersLoading) return <AccountOrdersSkeleton />
 
   if (!isAuthenticated || !user) {
     router.replace("/login")
     return null
   }
 
-  const { data: orders = [] } = useGetOrders("mine")
   const activeCount = orders.filter((o) => getRentalStatus(o) === "active").length
 
   const FILTER_TABS: { key: RentalStatus | "all"; label: string }[] = [

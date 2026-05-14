@@ -16,6 +16,7 @@ import { useAuthStore } from "@/lib/store/auth-store"
 import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
 import { useApproveProduct } from "@/lib/queries/products/useApproveProduct"
 import { useRejectProduct } from "@/lib/queries/products/useRejectProduct"
+import { AdminSkeleton } from "@/components/skeletons"
 import type { SubmittedProduct } from "@/lib/data/products"
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -267,7 +268,7 @@ function Dialog({
 export default function AdminPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
-  const { data: submittedProducts = [] } = useGetSubmissions()
+  const { data: submittedProducts = [], isLoading: subsLoading } = useGetSubmissions()
   const approveProductMutation = useApproveProduct()
   const rejectProductMutation = useRejectProduct()
 
@@ -297,7 +298,7 @@ export default function AdminPage() {
     reason: "",
   })
 
-  if (!hydrated) return null
+  if (!hydrated || subsLoading) return <AdminSkeleton />
   if (!user) {
     router.replace("/login")
     return null

@@ -22,6 +22,7 @@ import {
 } from "@/lib/store/auth-store"
 import { useGetOrders } from "@/lib/queries/orders/useGetOrders"
 import { useUpdateOrderStatus } from "@/lib/queries/orders/useUpdateOrderStatus"
+import { AccountOrderedSkeleton } from "@/components/skeletons"
 import {
   Select,
   SelectContent,
@@ -252,7 +253,7 @@ function OrderCard({
 export default function SupplierOrdersPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
-  const { data: orders = [] } = useGetOrders("shop")
+  const { data: orders = [], isLoading: ordersLoading } = useGetOrders("shop")
   const updateOrderStatusMutation = useUpdateOrderStatus()
   const updateOrderStatus = (id: string, status: OrderStatus) =>
     updateOrderStatusMutation.mutate({ id, status })
@@ -265,7 +266,7 @@ export default function SupplierOrdersPage() {
     () => false
   )
 
-  if (!hydrated) return null
+  if (!hydrated || ordersLoading) return <AccountOrderedSkeleton />
   if (!user) {
     router.replace("/login")
     return null

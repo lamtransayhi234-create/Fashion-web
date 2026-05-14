@@ -31,6 +31,7 @@ import { useGetProducts } from "@/lib/queries/products/useGetProducts"
 import { useGetProviders } from "@/lib/queries/providers/useGetProviders"
 import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
 import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
+import { ProductListSkeleton } from "@/components/skeletons"
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
@@ -732,6 +733,8 @@ function ProductsInner() {
   }
 
   const dirty = !isEqual(pending, applied)
+
+  if (productsLoading) return <ProductListSkeleton />
 
   return (
     <div className="min-h-screen" style={{ background: TK.bg }}>

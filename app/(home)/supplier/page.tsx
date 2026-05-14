@@ -18,6 +18,7 @@ import {
 import { useAuthStore } from "@/lib/store/auth-store"
 import { useGetSubmissions } from "@/lib/queries/products/useGetSubmissions"
 import { useSubmitProduct } from "@/lib/queries/products/useSubmitProduct"
+import { SupplierSkeleton } from "@/components/skeletons"
 import type {
   ProductCategory,
   ProductType,
@@ -184,7 +185,7 @@ function FieldLabel({
 export default function SupplierPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
-  const { data: submittedProducts = [] } = useGetSubmissions()
+  const { data: submittedProducts = [], isLoading: subsLoading } = useGetSubmissions()
   const submitProductMutation = useSubmitProduct()
 
   const hydrated = useSyncExternalStore(
@@ -206,7 +207,7 @@ export default function SupplierPage() {
   const [successDialog, setSuccessDialog] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
 
-  if (!hydrated) return null
+  if (!hydrated || subsLoading) return <SupplierSkeleton />
   if (!user) {
     router.replace("/login")
     return null
