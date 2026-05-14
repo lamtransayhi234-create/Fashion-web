@@ -33,16 +33,21 @@ export function useApproveProduct() {
       if (insErr || !prod) throw insErr ?? new Error("Insert product failed")
       const productId = (prod as { id: string }).id
 
-      // 2. Update submission status
+      // 2. Update submission status + reviewed_at
       const { error: updErr } = await supabase
         .from("product_submissions")
-        .update({ upload_status: "approved", product_id: productId } as never)
+        .update({
+          upload_status: "approved",
+          product_id: productId,
+          reviewed_at: new Date().toISOString(),
+        } as never)
         .eq("id", sub.id)
       if (updErr) throw updErr
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.submissions.all })
       qc.invalidateQueries({ queryKey: queryKeys.products.all })
+      qc.invalidateQueries({ queryKey: queryKeys.notifications.all })
     },
   })
 }

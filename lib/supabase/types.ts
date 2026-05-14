@@ -56,6 +56,7 @@ type ProductSubmissionsRow = {
   reject_reason:  string | null
   product_id:     string | null
   submitted_at:   string
+  reviewed_at:    string | null
 }
 
 type OrdersRow = {

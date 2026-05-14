@@ -26,4 +26,9 @@ export const queryKeys = {
     all: ["providers"] as const,
     list: () => [...queryKeys.providers.all, "list"] as const,
   },
+  notifications: {
+    all: ["notifications"] as const,
+    supplier: (userId: string) =>
+      [...queryKeys.notifications.all, "supplier", userId] as const,
+  },
 } as const

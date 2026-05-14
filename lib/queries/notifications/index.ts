@@ -1,4 +1,3 @@
-// Mock UI preview — swap sang useGetSupplierNotifications ở Task N.7
-export { useMockSupplierNotifications as useGetSupplierNotifications } from "./mockNotifications"
+export { useGetSupplierNotifications } from "./useGetSupplierNotifications"
 export { useNotificationsLastSeen } from "./useNotificationsLastSeen"
 export type { SupplierNotification } from "./types"

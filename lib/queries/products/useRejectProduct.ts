@@ -13,12 +13,17 @@ export function useRejectProduct() {
     mutationFn: async ({ id, reason }: RejectInput) => {
       const { error } = await getSupabase()
         .from("product_submissions")
-        .update({ upload_status: "rejected", reject_reason: reason } as never)
+        .update({
+          upload_status: "rejected",
+          reject_reason: reason,
+          reviewed_at: new Date().toISOString(),
+        } as never)
         .eq("id", id)
       if (error) throw error
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.submissions.all })
+      qc.invalidateQueries({ queryKey: queryKeys.notifications.all })
     },
   })
 }
