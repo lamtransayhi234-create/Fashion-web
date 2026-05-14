@@ -311,18 +311,28 @@ export default function AdminPage() {
     setTimeout(() => setToast(null), 3000)
   }
 
-  function confirmApprove() {
+  async function confirmApprove() {
     if (!approveDialog.id) return
-    approveProduct(approveDialog.id)
-    setApproveDialog({ open: false, id: null })
-    showToast("Sản phẩm đã được duyệt và xuất hiện trên shop!")
+    try {
+      await approveProduct(approveDialog.id)
+      setApproveDialog({ open: false, id: null })
+      showToast("Sản phẩm đã được duyệt và xuất hiện trên shop!")
+    } catch (err) {
+      console.error("approveProduct failed:", err)
+      showToast("Duyệt thất bại, vui lòng thử lại.")
+    }
   }
 
-  function confirmReject() {
+  async function confirmReject() {
     if (!rejectDialog.id || !rejectDialog.reason.trim()) return
-    rejectProduct(rejectDialog.id, rejectDialog.reason.trim())
-    setRejectDialog({ open: false, id: null, reason: "" })
-    showToast("Đã từ chối sản phẩm.")
+    try {
+      await rejectProduct(rejectDialog.id, rejectDialog.reason.trim())
+      setRejectDialog({ open: false, id: null, reason: "" })
+      showToast("Đã từ chối sản phẩm.")
+    } catch (err) {
+      console.error("rejectProduct failed:", err)
+      showToast("Từ chối thất bại, vui lòng thử lại.")
+    }
   }
 
   return (
