@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { parseISO, isAfter, isBefore, format } from "date-fns"
 import {
@@ -260,11 +260,7 @@ export default function SupplierOrdersPage() {
   const [filter, setFilter] = useState<DisplayStatus | "all">("all")
   const [toast, setToast] = useState<string | null>(null)
 
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   if (!hydrated || ordersLoading) return <AccountOrderedSkeleton />
   if (!user) {

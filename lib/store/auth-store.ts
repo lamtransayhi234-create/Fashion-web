@@ -95,7 +95,7 @@ type AuthState = {
 
 let unsubscribe: (() => void) | null = null
 
-const _useAuthStore = create<AuthState>()((set, get) => ({
+export const useAuthStore = create<AuthState>()((set, get) => ({
   isAuthenticated: false,
   user: null,
   hydrated: false,
@@ -222,19 +222,3 @@ export const ROLE_LABEL: Record<UserRole, string> = {
   supplier: "Nhà cung cấp",
 }
 
-// Backwards-compat shim: cho `useAuthStore.persist.hasHydrated()` trong consumer pages.
-// Có thể bỏ shim này sau khi đổi tất cả consumer sang `useAuthStore((s) => s.hydrated)`.
-type PersistShim = {
-  hasHydrated: () => boolean
-  onFinishHydration: (cb: () => void) => () => void
-}
-const persistShim: PersistShim = {
-  hasHydrated: () => _useAuthStore.getState().hydrated,
-  onFinishHydration: (cb) =>
-    _useAuthStore.subscribe((s, prev) => {
-      if (!prev.hydrated && s.hydrated) cb()
-    }),
-}
-;(_useAuthStore as unknown as { persist: PersistShim }).persist = persistShim
-
-export const useAuthStore = _useAuthStore as typeof _useAuthStore & { persist: PersistShim }

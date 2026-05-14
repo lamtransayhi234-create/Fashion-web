@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Package,
@@ -172,11 +172,7 @@ export default function SupplierPage() {
   const { data: submittedProducts = [], isLoading: subsLoading } = useGetSubmissions()
   const submitProductMutation = useSubmitProduct()
 
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   const [tab, setTab] = useState<"list" | "form">("list")
   const [statusFilter, setStatusFilter] = useState<

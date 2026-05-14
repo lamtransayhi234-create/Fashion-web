@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { useEffect, useState, useSyncExternalStore } from "react"
+import { useEffect, useState } from "react"
 import { Eye, EyeOff, Lock, Mail, Phone, Store, StoreIcon, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -35,11 +35,7 @@ export default function RegisterPage() {
   const router = useRouter()
   const register = useAuthStore((s) => s.register)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   useEffect(() => {
     if (hydrated && isAuthenticated) router.replace("/")

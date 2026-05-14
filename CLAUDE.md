@@ -159,3 +159,74 @@ When you scaffold a new page (e.g. `/shop`, `/about`, `/blog/[slug]`), match the
 - Don't use bright multi-color gradients on buttons.
 - Don't use chunky `rounded-3xl` / `rounded-[40px]` on small cards.
 - Don't add emoji-heavy headlines — at most one `✦`/`✧` motif per heading.
+
+---
+
+## 9. Backend — Supabase + React Query
+
+App đã chuyển từ localStorage (Zustand persist) sang Supabase. Xem spec đầy đủ:
+`docs/superpowers/specs/2026-05-14-supabase-migration-design.md`.
+
+### Layers
+
+| Layer | File | Trách nhiệm |
+|---|---|---|
+| Browser client | `lib/supabase/client.ts` (`getSupabase()`) | Singleton cho mọi Client Component / hook |
+| Server client | `lib/supabase/server.ts` (`createSupabaseServerClient()`) | Server Component / route handler |
+| Schema types | `lib/supabase/types.ts` | Hand-written, khớp `supabase/migrations/0001_init.sql` |
+| Data hooks | `lib/queries/<domain>/use*.ts` | TanStack Query — 1 hook / file, gom theo domain |
+| Auth session | `lib/store/auth-store.ts` | Zustand store — chỉ session (user, isAuthenticated, hydrated, login/logout/register/updateProfile/changePassword) |
+| Storage | `components/image-uploader.tsx` + bucket `product-images` | Upload ảnh sản phẩm |
+
+### Query hooks (lib/queries/)
+
+```
+products/  → useGetProducts, useGetProductDetail, useGetSubmissions,
+             useSubmitProduct, useApproveProduct, useRejectProduct
+orders/    → useGetOrders (auto-scope theo role), useAddOrder, useUpdateOrderStatus
+whitelist/ → useGetWhitelist, useToggleWhitelist
+providers/ → useGetProviders (suppliers list, cached 5 min)
+queryKeys.ts → factory key duy nhất cho query + invalidation
+```
+
+Mọi mutation invalidate query key liên quan qua `qc.invalidateQueries({ queryKey: queryKeys.X.all })`.
+
+### Auth flow
+
+- Root layout wrap `app/providers.tsx` → `QueryClientProvider` + `AuthInit` (gọi `useAuthStore.getState().init()` 1 lần).
+- `init()` đọc Supabase session + subscribe `onAuthStateChange` để sync cross-tab.
+- Login/register/logout là method async trên store, không phải mutation React Query (vì session state cần đồng bộ với listener).
+
+### Skeletons (components/skeletons/)
+
+Mỗi page có data fetch có skeleton tương ứng — match layout thật (3:4 aspect, hairline ring, slim radii). Bật khi `isLoading` hoặc `!hydrated`:
+
+```tsx
+const { data, isLoading } = useGetProducts()
+if (isLoading) return <ProductListSkeleton />
+```
+
+### Storage
+
+- Bucket: `product-images` (public read)
+- Path convention: `{user_id}/{uuid}.{ext}` → RLS owner-delete chỉ cho phép xoá file trong folder của mình
+- Dùng `<ImageUploader value={url} onChange={setUrl} />`
+
+### Demo accounts (seed)
+
+| Email | Password | Role |
+|---|---|---|
+| `user1@styleloop.vn` | `user123` | Khách thuê |
+| `user2@styleloop.vn` | `user123` | Khách thuê |
+| `admin@styleloop.vn` | `admin123` | Quản trị viên |
+| `supplier1@styleloop.vn` | `supplier123` | Cung cấp (Bảo Closet) |
+| `supplier2@styleloop.vn` | `supplier123` | Cung cấp (Yến Vintage) |
+
+Re-seed: `pnpm seed` (idempotent — skip user/products đã tồn tại).
+
+### Migration files
+
+- `supabase/migrations/0001_init.sql` — 5 bảng + enums + trigger + RLS
+- `supabase/migrations/0002_storage.sql` — bucket + storage policies
+
+Apply qua Supabase Dashboard → SQL Editor (manual).

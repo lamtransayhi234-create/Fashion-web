@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -265,11 +265,7 @@ export default function AccountPage() {
   const updateProfile = useAuthStore((s) => s.updateProfile)
   const { data: orders = [] } = useGetOrders()
   const { data: whitelist = [] } = useGetWhitelist()
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   if (!hydrated) return null
   if (!user) { router.replace("/login"); return null }

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   CheckCircle2,
@@ -272,11 +272,7 @@ export default function AdminPage() {
   const approveProductMutation = useApproveProduct()
   const rejectProductMutation = useRejectProduct()
 
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   const [tab, setTab] = useState<"pending" | "done">("pending")
   const [toast, setToast] = useState<string | null>(null)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useSyncExternalStore } from "react"
+import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { parseISO, isAfter, isBefore, isEqual, format } from "date-fns"
@@ -101,11 +101,7 @@ export default function OrdersPage() {
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
   const { data: orders = [], isLoading: ordersLoading } = useGetOrders("mine")
 
   const [filter, setFilter] = useState<RentalStatus | "all">("all")

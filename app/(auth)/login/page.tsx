@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useEffect, useState, Suspense, useSyncExternalStore } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { Eye, EyeOff, Lock, Mail, Shield, Store, User } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -36,11 +36,7 @@ function LoginInner() {
   const redirect = search?.get("redirect") || "/"
   const login = useAuthStore((s) => s.login)
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")

@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useSyncExternalStore } from "react"
+import {} from "react"
 import { ArrowRight } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
@@ -9,11 +9,7 @@ import { useAuthStore } from "@/lib/store/auth-store"
 
 export function CtaButtons() {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
 
   const showRegister = hydrated && !isAuthenticated
 

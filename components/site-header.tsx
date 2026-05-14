@@ -2,13 +2,7 @@
 
 import Link from "next/link"
 import { usePathname, useRouter } from "next/navigation"
-import {
-  useEffect,
-  useRef,
-  useState,
-  useSyncExternalStore,
-  useCallback,
-} from "react"
+import { useEffect, useRef, useState, useCallback } from "react"
 import {
   ArrowLeft,
   ArrowRight,
@@ -141,11 +135,7 @@ export function SiteHeader() {
   )
   const pendingProductCount = pendingProducts.length
 
-  const hydrated = useSyncExternalStore(
-    (cb) => useAuthStore.persist.onFinishHydration(cb),
-    () => useAuthStore.persist.hasHydrated(),
-    () => false
-  )
+  const hydrated = useAuthStore((s) => s.hydrated)
   const authed = hydrated && isAuthenticated && !!user
 
   // Close account dropdown on outside click / esc
