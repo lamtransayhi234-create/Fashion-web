@@ -122,15 +122,13 @@ export function SiteHeader() {
 
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
   const user = useAuthStore((s) => s.user)
-  const users = useAuthStore((s) => s.users)
   const logout = useAuthStore((s) => s.logout)
   const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
-  const wishlist = user?.whitelist ?? []
+  const wishlist = useAuthStore((s) => s.whitelist)
+  const orders = useAuthStore((s) => s.orders)
   const pendingOrders =
     user?.role === "supplier"
-      ? users
-          .flatMap((u) => u.orders)
-          .filter((o) => o.providerId === user.id && o.status === "pending")
+      ? orders.filter((o) => o.providerId === user.id && o.status === "pending")
       : []
   const pendingOrderCount = pendingOrders.length
 

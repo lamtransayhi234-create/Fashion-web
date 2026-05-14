@@ -579,7 +579,10 @@ function ProductsInner() {
     types: typeParam ? [typeParam] : [],
   })
 
-  const { user, isAuthenticated, toggleWhitelist } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
+  const whitelist = useAuthStore((s) => s.whitelist)
   const isCustomer = isAuthenticated && user?.role === "user"
 
   const [pending, setPending] = useState<Filters>(initFilters)
@@ -1042,7 +1045,7 @@ function ProductsInner() {
                     const oos = product.status === "out_of_stock"
 
                     const isWishlisted =
-                      user?.whitelist.some((w) => w.id === product.id) ?? false
+                      whitelist.some((w) => w.id === product.id)
 
                     return (
                       <div key={product.id} className="group block h-full">

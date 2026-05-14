@@ -34,9 +34,12 @@ export function ProductCard({
   rating,
   availability,
 }: ProductCardProps) {
-  const { user, isAuthenticated, toggleWhitelist } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated)
+  const toggleWhitelist = useAuthStore((s) => s.toggleWhitelist)
+  const whitelist = useAuthStore((s) => s.whitelist)
   const isCustomer = isAuthenticated && user?.role === "user"
-  const isWishlisted = user?.whitelist.some((w) => w.id === product.id) ?? false
+  const isWishlisted = whitelist.some((w) => w.id === product.id)
 
   return (
     <div className="group relative">

@@ -159,15 +159,18 @@ function ChangePassword({ onSave }: { onSave: (pw: string) => void }) {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
 
-  const currentUserId = useAuthStore((s) => s.currentUserId)
-  const rawUser = useAuthStore((s) => s.users.find((u) => u.id === currentUserId))
-
-  const submit = () => {
+  const submit = async () => {
     setError(null)
     if (!current || !next || !confirm) { setError("Vui lòng điền đầy đủ."); return }
-    if (rawUser?.password !== current) { setError("Mật khẩu hiện tại không đúng."); return }
     if (next.length < 6) { setError("Mật khẩu mới phải có ít nhất 6 ký tự."); return }
     if (next !== confirm) { setError("Xác nhận không khớp."); return }
+    // Supabase không expose password hiện tại — re-auth bằng signIn để verify
+    const u = useAuthStore.getState().user
+    if (!u) { setError("Chưa đăng nhập."); return }
+    const reauth = await useAuthStore.getState().login(u.email, current)
+    if (!reauth.success) { setError("Mật khẩu hiện tại không đúng."); return }
+    const res = await useAuthStore.getState().changePassword(next)
+    if (!res.success) { setError(res.message ?? "Đổi mật khẩu thất bại."); return }
     onSave(next)
     setCurrent(""); setNext(""); setConfirm("")
     setOpen(false); setSuccess(true)
@@ -256,7 +259,10 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
 
 export default function AccountPage() {
   const router = useRouter()
-  const { user, updateProfile } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const updateProfile = useAuthStore((s) => s.updateProfile)
+  const orders = useAuthStore((s) => s.orders)
+  const whitelist = useAuthStore((s) => s.whitelist)
   const hydrated = useSyncExternalStore(
     (cb) => useAuthStore.persist.onFinishHydration(cb),
     () => useAuthStore.persist.hasHydrated(),
@@ -312,7 +318,7 @@ export default function AccountPage() {
                   <Package className="size-5" style={{ color: TK.camel }} strokeWidth={1.4} />
                 </div>
                 <div>
-                  <p className="font-display text-[22px] font-bold leading-none" style={{ color: TK.ink }}>{user.orders.length}</p>
+                  <p className="font-display text-[22px] font-bold leading-none" style={{ color: TK.ink }}>{orders.length}</p>
                   <p className="mt-0.5 text-[11px]" style={{ color: TK.sub }}>Đơn thuê</p>
                 </div>
               </Link>
@@ -322,7 +328,7 @@ export default function AccountPage() {
                   <Heart className="size-5" style={{ color: TK.camel }} strokeWidth={1.4} />
                 </div>
                 <div>
-                  <p className="font-display text-[22px] font-bold leading-none" style={{ color: TK.ink }}>{user.whitelist.length}</p>
+                  <p className="font-display text-[22px] font-bold leading-none" style={{ color: TK.ink }}>{whitelist.length}</p>
                   <p className="mt-0.5 text-[11px]" style={{ color: TK.sub }}>Yêu thích</p>
                 </div>
               </div>
@@ -356,7 +362,7 @@ export default function AccountPage() {
         {/* ── Bảo mật ── */}
         <div>
           <SectionLabel>Bảo mật</SectionLabel>
-          <ChangePassword onSave={(pw) => updateProfile({ password: pw })} />
+          <ChangePassword onSave={() => {/* handled inside ChangePassword via changePassword action */}} />
         </div>
 
       </div>

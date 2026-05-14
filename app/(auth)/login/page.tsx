@@ -54,11 +54,11 @@ function LoginInner() {
 
   if (hydrated && isAuthenticated) return null
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const res = login(email, password)
+    const res = await login(email, password)
     setLoading(false)
     if (!res.success) {
       setError(res.message)

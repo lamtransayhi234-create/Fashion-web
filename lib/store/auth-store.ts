@@ -1,8 +1,9 @@
 "use client"
 
 import { create } from "zustand"
-import { persist } from "zustand/middleware"
 
+import { getSupabase } from "@/lib/supabase/client"
+import type { Database } from "@/lib/supabase/types"
 import type { Product } from "@/lib/data/products"
 
 export type UserRole = "user" | "admin" | "supplier"
@@ -36,171 +37,50 @@ export type Order = {
   createdAt: string         // ISO timestamp
 }
 
-export type AuthUser = {
+export type PublicUser = {
   id: string
   email: string
-  password: string
   name: string
   role: UserRole
   avatar?: string
   phone?: string
   address?: string
-  orders: Order[]
-  whitelist: Product[]
-  // role-specific
-  shopName?: string   // supplier
-  permissions?: string[] // admin
+  shopName?: string
+  permissions?: string[]
 }
 
-// ─── Mock users ───────────────────────────────────────────────────────────────
+type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"]
 
-// SVG data-URL avatars — no external dependency
-const AVATAR_USER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8dcc8'/%3E%3Ccircle cx='50' cy='36' r='20' fill='%23b8956a'/%3E%3Cellipse cx='50' cy='90' rx='32' ry='22' fill='%23b8956a'/%3E%3C/svg%3E"
+const profileToUser = (p: ProfileRow): PublicUser => ({
+  id: p.id,
+  email: p.email,
+  name: p.name,
+  role: p.role,
+  avatar: p.avatar ?? undefined,
+  phone: p.phone ?? undefined,
+  address: p.address ?? undefined,
+  shopName: p.shop_name ?? undefined,
+  permissions: p.permissions ?? undefined,
+})
 
-const AVATAR_SUPPLIER =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23e8dcc8'/%3E%3Crect x='22' y='48' width='56' height='34' fill='%23b8956a'/%3E%3Cpolygon points='14,48 86,48 76,22 24,22' fill='%238b6f4e'/%3E%3Crect x='40' y='62' width='20' height='20' fill='%23e8dcc8'/%3E%3C/svg%3E"
-
-const AVATAR_ADMIN =
-  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%231c1917'/%3E%3Ctext x='50' y='68' font-size='52' font-weight='bold' text-anchor='middle' fill='%23f0e4d0' font-family='Georgia%2Cserif'%3EA%3C/text%3E%3C/svg%3E"
-
-export const MOCK_USERS: AuthUser[] = [
-  {
-    id: "u-001",
-    email: "user1@styleloop.vn",
-    password: "user123",
-    name: "Linh Nguyễn",
-    role: "user",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_USER,
-  },
-  {
-    id: "u-002",
-    email: "user2@styleloop.vn",
-    password: "user123",
-    name: "Trang Phạm",
-    role: "user",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_USER,
-  },
-  {
-    id: "u-003",
-    email: "user3@styleloop.vn",
-    password: "user123",
-    name: "Mai Trần",
-    role: "user",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_USER,
-  },
-]
-
-export const MOCK_ADMINS: AuthUser[] = [
-  {
-    id: "a-001",
-    email: "admin@styleloop.vn",
-    password: "admin123",
-    name: "Vincent Lê",
-    role: "admin",
-    permissions: ["users.manage", "orders.manage", "products.manage", "reports.view"],
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_ADMIN,
-  },
-]
-
-export const MOCK_SUPPLIERS: AuthUser[] = [
-  {
-    id: "s-001",
-    email: "supplier1@styleloop.vn",
-    password: "supplier123",
-    name: "Bảo Lê",
-    role: "supplier",
-    shopName: "Bảo Closet",
-    phone: "0931111111",
-    address: "120 Phan Xích Long, Q.Phú Nhuận, TP.HCM",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_SUPPLIER,
-  },
-  {
-    id: "s-002",
-    email: "supplier2@styleloop.vn",
-    password: "supplier123",
-    name: "Yến Vũ",
-    role: "supplier",
-    shopName: "Yến Vintage",
-    phone: "0932222222",
-    address: "55 Trần Hưng Đạo, Q.5, TP.HCM",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_SUPPLIER,
-  },
-  {
-    id: "s-003",
-    email: "supplier3@styleloop.vn",
-    password: "supplier123",
-    name: "Khoa Trịnh",
-    role: "supplier",
-    shopName: "Khoa Y2K Studio",
-    phone: "0933333333",
-    address: "9 Lý Tự Trọng, Q.1, TP.HCM",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_SUPPLIER,
-  },
-  {
-    id: "s-004",
-    email: "supplier4@styleloop.vn",
-    password: "supplier123",
-    name: "Lan Hoàng",
-    role: "supplier",
-    shopName: "GenZ Vibes",
-    phone: "0934444444",
-    address: "88 Xuân Thủy, Cầu Giấy, Hà Nội",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_SUPPLIER,
-  },
-  {
-    id: "s-005",
-    email: "supplier5@styleloop.vn",
-    password: "supplier123",
-    name: "Minh Linh",
-    role: "supplier",
-    shopName: "Linh's Fashion",
-    phone: "0935555555",
-    address: "22 Láng Hạ, Đống Đa, Hà Nội",
-    orders: [],
-    whitelist: [],
-    avatar: AVATAR_SUPPLIER,
-  },
-]
-
-export const ALL_MOCK_ACCOUNTS: AuthUser[] = [
-  ...MOCK_USERS,
-  ...MOCK_ADMINS,
-  ...MOCK_SUPPLIERS,
-]
-
-// ─── Store ────────────────────────────────────────────────────────────────────
-
-export type PublicUser = Omit<AuthUser, "password">
+type Result<T> = { success: true; user: T } | { success: false; message: string }
 
 type AuthState = {
   isAuthenticated: boolean
-  currentUserId: string | null
-  /** Derived from users + currentUserId — not persisted */
   user: PublicUser | null
-  /** Source of truth for all users and their orders — persisted */
-  users: AuthUser[]
-  login: (
-    email: string,
-    password: string
-  ) => { success: true; user: PublicUser } | { success: false; message: string }
-  logout: () => void
+  hydrated: boolean       // thay cho persist.hasHydrated cũ
+
+  /** Danh sách orders/whitelist của user hiện tại — fetched lazily ở Phase 6 */
+  orders: Order[]
+  whitelist: Product[]
+  /** All users — chỉ admin fetch được; default empty cho các page cũ */
+  users: PublicUser[]
+
+  /** Gọi 1 lần ở root layout */
+  init: () => Promise<void>
+
+  login: (email: string, password: string) => Promise<Result<PublicUser>>
+  logout: () => Promise<void>
   register: (input: {
     email: string
     password: string
@@ -208,180 +88,185 @@ type AuthState = {
     role?: UserRole
     shopName?: string
     phone?: string
-  }) => { success: true; user: PublicUser } | { success: false; message: string }
-  updateProfile: (patch: { name?: string; phone?: string; address?: string; password?: string; shopName?: string }) => void
-  addOrder: (order: Omit<Order, "id" | "createdAt" | "userId">) => Order
-  confirmOrder: (orderId: string) => void
-  updateOrderStatus: (orderId: string, status: OrderStatus) => void
-  toggleWhitelist: (product: Product) => void
+  }) => Promise<Result<PublicUser>>
+  updateProfile: (patch: {
+    name?: string
+    phone?: string
+    address?: string
+    shopName?: string
+  }) => Promise<{ success: boolean; message?: string }>
+  changePassword: (newPassword: string) => Promise<{ success: boolean; message?: string }>
+
+  // Stubs — wired to Supabase ở Phase 6 (Task 17/18/19)
+  addOrder: (order: Omit<Order, "id" | "createdAt" | "userId">) => Promise<Order>
+  updateOrderStatus: (orderId: string, status: OrderStatus) => Promise<void>
+  confirmOrder: (orderId: string) => Promise<void>
+  toggleWhitelist: (product: Product) => Promise<void>
+  refetchUserData: () => Promise<void>
 }
 
-const stripPassword = (u: AuthUser): PublicUser => {
-  const { password: _pw, ...rest } = u
-  void _pw
-  return rest
-}
+let unsubscribe: (() => void) | null = null
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
-      isAuthenticated: false,
-      currentUserId: null,
-      user: null,
-      users: ALL_MOCK_ACCOUNTS,
+const _useAuthStore = create<AuthState>()((set, get) => ({
+  isAuthenticated: false,
+  user: null,
+  hydrated: false,
+  orders: [],
+  whitelist: [],
+  users: [],
 
-      login: (email, password) => {
-        const { users } = get()
-        const normalized = email.trim().toLowerCase()
-        const found = users.find(
-          (u) => u.email.toLowerCase() === normalized && u.password === password
-        )
-        if (!found) {
-          return { success: false, message: "Email hoặc mật khẩu không đúng." }
-        }
-        const publicUser = stripPassword(found)
-        set({ isAuthenticated: true, currentUserId: found.id, user: publicUser })
-        return { success: true, user: publicUser }
-      },
+  init: async () => {
+    if (get().hydrated) return
+    const supabase = getSupabase()
 
-      logout: () => set({ isAuthenticated: false, currentUserId: null, user: null }),
-
-      register: ({ email, password, name, role = "user", shopName, phone }) => {
-        const normalized = email.trim().toLowerCase()
-        if (!email || !password || !name) {
-          return { success: false, message: "Vui lòng điền đầy đủ thông tin." }
-        }
-        const { users } = get()
-        if (users.some((u) => u.email.toLowerCase() === normalized)) {
-          return { success: false, message: "Email này đã được đăng ký." }
-        }
-        const newUser: AuthUser = {
-          id: `${role[0]}-${Date.now()}`,
-          email: normalized,
-          password,
-          name,
-          role,
-          orders: [],
-          whitelist: [],
-          shopName: role === "supplier" ? shopName : undefined,
-          phone: role === "supplier" ? phone : undefined,
-        }
-        const publicUser = stripPassword(newUser)
-        set((state) => ({
-          users: [...state.users, newUser],
-          isAuthenticated: true,
-          currentUserId: newUser.id,
-          user: publicUser,
-        }))
-        return { success: true, user: publicUser }
-      },
-
-      updateProfile: (patch) => {
-        const userId = get().currentUserId
-        if (!userId) return
-        set((state) => {
-          const updatedUsers = state.users.map((u) => {
-            if (u.id !== userId) return u
-            return {
-              ...u,
-              ...(patch.name !== undefined && { name: patch.name }),
-              ...(patch.phone !== undefined && { phone: patch.phone }),
-              ...(patch.address !== undefined && { address: patch.address }),
-              ...(patch.password !== undefined && { password: patch.password }),
-              ...(patch.shopName !== undefined && { shopName: patch.shopName }),
-            }
-          })
-          const updatedRaw = updatedUsers.find((u) => u.id === userId)
-          return {
-            users: updatedUsers,
-            user: updatedRaw ? stripPassword(updatedRaw) : state.user,
-          }
-        })
-      },
-
-      addOrder: (orderData) => {
-        const userId = get().currentUserId ?? "unknown"
-        const order: Order = {
-          ...orderData,
-          id: `ord-${Date.now()}`,
-          userId,
-          createdAt: new Date().toISOString(),
-        }
-        set((state) => {
-          const updatedUsers = state.users.map((u) =>
-            u.id === userId ? { ...u, orders: [order, ...u.orders] } : u
-          )
-          const updatedRaw = updatedUsers.find((u) => u.id === userId)
-          return {
-            users: updatedUsers,
-            user: updatedRaw ? stripPassword(updatedRaw) : state.user,
-          }
-        })
-        return order
-      },
-
-      confirmOrder: (orderId) => {
-        get().updateOrderStatus(orderId, "confirmed")
-      },
-
-      updateOrderStatus: (orderId, status) => {
-        set((state) => {
-          const updatedUsers = state.users.map((u) => {
-            const idx = u.orders.findIndex((o) => o.id === orderId)
-            if (idx === -1) return u
-            const updatedOrders = [...u.orders]
-            updatedOrders[idx] = { ...updatedOrders[idx], status }
-            return { ...u, orders: updatedOrders }
-          })
-          const currentRaw = updatedUsers.find((u) => u.id === state.currentUserId)
-          return {
-            users: updatedUsers,
-            user: currentRaw ? stripPassword(currentRaw) : state.user,
-          }
-        })
-      },
-
-      toggleWhitelist: (product) => {
-        const userId = get().currentUserId
-        if (!userId) return
-        set((state) => {
-          const updatedUsers = state.users.map((u) => {
-            if (u.id !== userId) return u
-            const current = u.whitelist
-            const isLiked = current.some((w) => w.id === product.id)
-            const next = isLiked
-              ? current.filter((w) => w.id !== product.id)
-              : [...current, product]
-            return { ...u, whitelist: next }
-          })
-          const updatedRaw = updatedUsers.find((u) => u.id === userId)
-          return {
-            users: updatedUsers,
-            user: updatedRaw ? stripPassword(updatedRaw) : state.user,
-          }
-        })
-      },
-    }),
-    {
-      name: "styleloop-auth",
-      version: 3,
-      partialize: (state) => ({
-        isAuthenticated:  state.isAuthenticated,
-        currentUserId:    state.currentUserId,
-        users:            state.users,
-      }),
-      onRehydrateStorage: () => (state) => {
-        if (state?.currentUserId) {
-          const found = state.users.find((u) => u.id === state.currentUserId)
-          if (found) state.user = stripPassword(found)
-        }
-      },
+    const { data: { session } } = await supabase.auth.getSession()
+    if (session?.user) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", session.user.id)
+        .single()
+      if (profile) {
+        set({ isAuthenticated: true, user: profileToUser(profile) })
+      }
     }
-  )
-)
+    set({ hydrated: true })
+
+    // Subscribe cho logout/refresh giữa các tab
+    if (!unsubscribe) {
+      const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+        if (event === "SIGNED_OUT" || !session) {
+          set({ isAuthenticated: false, user: null, orders: [], whitelist: [] })
+          return
+        }
+        if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("*")
+            .eq("id", session.user.id)
+            .single()
+          if (profile) set({ isAuthenticated: true, user: profileToUser(profile) })
+        }
+      })
+      unsubscribe = () => sub.subscription.unsubscribe()
+    }
+  },
+
+  login: async (email, password) => {
+    const supabase = getSupabase()
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password,
+    })
+    if (error || !data.user) {
+      return { success: false, message: "Email hoặc mật khẩu không đúng." }
+    }
+    const { data: profile } = await supabase
+      .from("profiles").select("*").eq("id", data.user.id).single()
+    if (!profile) return { success: false, message: "Không tìm thấy hồ sơ." }
+    const u = profileToUser(profile)
+    set({ isAuthenticated: true, user: u })
+    return { success: true, user: u }
+  },
+
+  logout: async () => {
+    await getSupabase().auth.signOut()
+    set({ isAuthenticated: false, user: null, orders: [], whitelist: [] })
+  },
+
+  register: async ({ email, password, name, role = "user", shopName, phone }) => {
+    if (!email || !password || !name) {
+      return { success: false, message: "Vui lòng điền đầy đủ thông tin." }
+    }
+    const supabase = getSupabase()
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password,
+      options: {
+        data: { name, role, shop_name: shopName, phone },
+      },
+    })
+    if (error || !data.user) {
+      const msg = error?.message?.includes("already")
+        ? "Email này đã được đăng ký."
+        : error?.message ?? "Đăng ký thất bại."
+      return { success: false, message: msg }
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles").select("*").eq("id", data.user.id).single()
+    if (!profile) {
+      return { success: false, message: "Tạo hồ sơ thất bại, vui lòng thử lại." }
+    }
+    const u = profileToUser(profile)
+    set({ isAuthenticated: true, user: u })
+    return { success: true, user: u }
+  },
+
+  updateProfile: async (patch) => {
+    const id = get().user?.id
+    if (!id) return { success: false, message: "Chưa đăng nhập." }
+    const supabase = getSupabase()
+    const dbPatch: Database["public"]["Tables"]["profiles"]["Update"] = {
+      ...(patch.name      !== undefined && { name: patch.name }),
+      ...(patch.phone     !== undefined && { phone: patch.phone }),
+      ...(patch.address   !== undefined && { address: patch.address }),
+      ...(patch.shopName  !== undefined && { shop_name: patch.shopName }),
+    }
+    const { data, error } = await supabase
+      .from("profiles")
+      .update(dbPatch as never)
+      .eq("id", id)
+      .select("*")
+      .single()
+    if (error || !data) return { success: false, message: error?.message ?? "Cập nhật thất bại." }
+    set({ user: profileToUser(data) })
+    return { success: true }
+  },
+
+  changePassword: async (newPassword) => {
+    const { error } = await getSupabase().auth.updateUser({ password: newPassword })
+    if (error) return { success: false, message: error.message }
+    return { success: true }
+  },
+
+  // ─── Stubs (Phase 6 sẽ wire vào Supabase) ──────────────────────────────────
+  addOrder: async () => {
+    throw new Error("addOrder chưa wired — sẽ implement ở Task 17/18")
+  },
+  updateOrderStatus: async () => {
+    throw new Error("updateOrderStatus chưa wired — sẽ implement ở Task 17")
+  },
+  confirmOrder: async () => {
+    throw new Error("confirmOrder chưa wired — sẽ implement ở Task 17")
+  },
+  toggleWhitelist: async () => {
+    throw new Error("toggleWhitelist chưa wired — sẽ implement ở Task 17/19")
+  },
+  refetchUserData: async () => {
+    /* no-op, sẽ implement ở Task 17 */
+  },
+}))
 
 export const ROLE_LABEL: Record<UserRole, string> = {
   user:     "Khách hàng",
   admin:    "Quản trị viên",
   supplier: "Nhà cung cấp",
 }
+
+// Backwards-compat shim: cho `useAuthStore.persist.hasHydrated()` trong các page chưa migrate xong.
+// Sẽ remove ở Task 23 sau khi đổi tất cả consumer sang `(s) => s.hydrated`.
+type PersistShim = {
+  hasHydrated: () => boolean
+  onFinishHydration: (cb: () => void) => () => void
+}
+const persistShim: PersistShim = {
+  hasHydrated: () => _useAuthStore.getState().hydrated,
+  onFinishHydration: (cb) =>
+    _useAuthStore.subscribe((s, prev) => {
+      if (!prev.hydrated && s.hydrated) cb()
+    }),
+}
+;(_useAuthStore as unknown as { persist: PersistShim }).persist = persistShim
+
+export const useAuthStore = _useAuthStore as typeof _useAuthStore & { persist: PersistShim }

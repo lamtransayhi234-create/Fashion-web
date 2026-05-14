@@ -114,7 +114,7 @@ export default function OrdersPage() {
     return null
   }
 
-  const orders = user.orders ?? []
+  const orders = useAuthStore.getState().orders
   const activeCount = orders.filter((o) => getRentalStatus(o) === "active").length
 
   const FILTER_TABS: { key: RentalStatus | "all"; label: string }[] = [

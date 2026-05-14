@@ -249,7 +249,9 @@ function OrderCard({
 
 export default function SupplierOrdersPage() {
   const router = useRouter()
-  const { user, users, updateOrderStatus } = useAuthStore()
+  const user = useAuthStore((s) => s.user)
+  const orders = useAuthStore((s) => s.orders)
+  const updateOrderStatus = useAuthStore((s) => s.updateOrderStatus)
   const [filter, setFilter] = useState<DisplayStatus | "all">("all")
   const [toast, setToast] = useState<string | null>(null)
 
@@ -271,10 +273,11 @@ export default function SupplierOrdersPage() {
 
   const safeUser = user
 
-  // Gom tất cả đơn của shop
-  const allOrders = users
-    .flatMap((u) => u.orders.map((o) => ({ order: o, customer: u })))
-    .filter(({ order }) => order.providerId === safeUser.id)
+  // Gom tất cả đơn của shop (orders đã được RLS filter cho provider)
+  // Customer name/email sẽ được populate bằng join ở Phase 6 (Task 17)
+  const allOrders = orders
+    .filter((order) => order.providerId === safeUser.id)
+    .map((order) => ({ order, customer: { id: order.userId, name: "Khách hàng", email: "" } }))
     .sort(
       (a, b) =>
         new Date(b.order.createdAt).getTime() -
