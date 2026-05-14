@@ -13,7 +13,7 @@ const rowToOrder = (r: OrderRow): Order => ({
   id: r.id,
   userId: r.user_id,
   providerId: r.provider_id,
-  productId: r.product_id,
+  productId: r.product_id ?? "",
   productName: r.product_name,
   productSrc: r.product_src,
   productType: r.product_type,

@@ -62,7 +62,7 @@ type OrdersRow = {
   id:                    string
   user_id:               string
   provider_id:           string
-  product_id:            string
+  product_id:            string | null
   product_name:          string
   product_src:           string
   product_type:          string
