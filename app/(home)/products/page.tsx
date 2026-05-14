@@ -658,7 +658,7 @@ function ProductsInner() {
       r = r.filter((p) => p.rentalPrice <= applied.priceMax)
     if (applied.locations.length)
       r = r.filter((p) => {
-        const pv = providers.find((v) => v.id === p.providerId)
+        const pv = dynamicProviders.find((v) => v.id === p.providerId)
         return pv ? applied.locations.includes(pv.location) : false
       })
     if (applied.tags.length)
@@ -675,7 +675,7 @@ function ProductsInner() {
         break
     }
     return r
-  }, [applied, sort, keyword])
+  }, [allProducts, dynamicProviders, applied, sort, keyword])
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE))
   const currentPage = Math.min(page, totalPages)
@@ -1043,7 +1043,7 @@ function ProductsInner() {
                 {/* 3 rows × 4 cols */}
                 <div className="grid grid-cols-2 gap-5 md:grid-cols-3 lg:grid-cols-4">
                   {pageItems.map((product) => {
-                    const pv = providers.find(
+                    const pv = dynamicProviders.find(
                       (p) => p.id === product.providerId
                     )
                     const savings = Math.round(
