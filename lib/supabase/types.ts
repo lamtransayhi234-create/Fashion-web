@@ -61,7 +61,7 @@ type ProductSubmissionsRow = {
 type OrdersRow = {
   id:                    string
   user_id:               string
-  provider_id:           string
+  provider_id:           string | null
   product_id:            string | null
   product_name:          string
   product_src:           string
