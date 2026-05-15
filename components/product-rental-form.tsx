@@ -24,8 +24,8 @@ import { useAuthStore } from "@/lib/store/auth-store"
 import { useOrderStore } from "@/lib/store/order-store"
 import type { ProductSize } from "@/lib/data/products"
 
-const MIN_RENTAL_DAYS = 3
-const MAX_RENTAL_DAYS = 21
+const MIN_RENTAL_DAYS = 1
+const MAX_RENTAL_DAYS = 7
 
 // Force light-mode palette for the calendar popover regardless of system theme
 const calendarVars = {

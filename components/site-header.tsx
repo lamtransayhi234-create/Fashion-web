@@ -52,6 +52,7 @@ import { useGetWhitelist } from "@/lib/queries/whitelist/useGetWhitelist"
 import { useToggleWhitelist } from "@/lib/queries/whitelist/useToggleWhitelist"
 import {
   useGetSupplierNotifications,
+  useGetUserOrderNotifications,
   useNotificationsLastSeen,
 } from "@/lib/queries/notifications"
 import { formatDistanceToNow } from "date-fns"
@@ -112,6 +113,32 @@ function formatRelative(iso: string): string {
   return formatDistanceToNow(new Date(iso), { addSuffix: true, locale: vi })
 }
 
+// ── Unified view-model cho Bell (supplier + user dùng chung) ─────────────────
+type NotifVariant = "approved" | "rejected" | "neutral"
+
+type NotifVM = {
+  id: string
+  href: string
+  productName: string
+  productSrc: string
+  timestamp: string
+  badgeLabel: string
+  variant: NotifVariant
+  detail?: string
+}
+
+const BADGE_CLASS: Record<NotifVariant, string> = {
+  approved: "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]",
+  neutral: "bg-[oklch(0.86_0.034_70)] text-[oklch(0.24_0.018_55)]",
+  rejected: "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]",
+}
+
+const USER_ORDER_LABEL: Record<"confirmed" | "completed" | "cancelled", { label: string; variant: NotifVariant }> = {
+  confirmed: { label: "Đã xác nhận", variant: "approved" },
+  completed: { label: "Đã hoàn tất", variant: "neutral" },
+  cancelled: { label: "Đã huỷ", variant: "rejected" },
+}
+
 export function SiteHeader() {
   const pathname = usePathname() ?? "/"
   const router = useRouter()
@@ -148,12 +175,43 @@ export function SiteHeader() {
   )
   const pendingProductCount = pendingProducts.length
 
-  // Bell notifications cho supplier (admin approve/reject sản phẩm)
-  const { data: notifications = [] } = useGetSupplierNotifications()
-  const { isUnread, markAllSeen } = useNotificationsLastSeen()
+  // Bell notifications: supplier (admin duyệt/từ chối sản phẩm) HOẶC
+  // user (supplier đổi trạng thái đơn). Cùng UI, dataset khác theo role.
+  const isSupplierRole = user?.role === "supplier"
+  const isUserRole = user?.role === "user"
+  const { data: supplierNotifs = [] } = useGetSupplierNotifications()
+  const { data: userOrderNotifs = [] } = useGetUserOrderNotifications()
+  const notifScope = isSupplierRole ? "supplier" : "user"
+  const { isUnread, markAllSeen } = useNotificationsLastSeen(notifScope)
+
+  const notifications: NotifVM[] = isSupplierRole
+    ? supplierNotifs.map((n) => ({
+        id: n.id,
+        href: "/supplier",
+        productName: n.productName,
+        productSrc: n.productSrc,
+        timestamp: n.reviewedAt,
+        badgeLabel: n.type === "approved" ? "Được duyệt" : "Từ chối",
+        variant: n.type === "approved" ? "approved" : "rejected",
+        detail: n.type === "rejected" ? n.rejectReason : undefined,
+      }))
+    : userOrderNotifs.map((n) => {
+        const meta = USER_ORDER_LABEL[n.status]
+        return {
+          id: n.id,
+          href: "/account/ordered",
+          productName: n.productName,
+          productSrc: n.productSrc,
+          timestamp: n.statusUpdatedAt,
+          badgeLabel: meta.label,
+          variant: meta.variant,
+        }
+      })
+
   const unreadNotifCount = notifications.filter((n) =>
-    isUnread(n.reviewedAt)
+    isUnread(n.timestamp)
   ).length
+  const showBell = isSupplierRole || isUserRole
 
   const hydrated = useAuthStore((s) => s.hydrated)
   const authed = hydrated && isAuthenticated && !!user
@@ -596,8 +654,8 @@ export function SiteHeader() {
             )}
           </Button>
 
-          {/* Supplier pending orders — Desktop: Dropdown */}
-          {authed && user?.role === "supplier" && (
+          {/* Bell (supplier & user) + Supplier pending orders */}
+          {authed && showBell && (
             <>
               {/* ── Bell — Thông báo admin duyệt/từ chối sản phẩm ── */}
               <DropdownMenu
@@ -651,12 +709,11 @@ export function SiteHeader() {
                   ) : (
                     <div className="max-h-[400px] overflow-y-auto">
                       {notifications.map((n) => {
-                        const unread = isUnread(n.reviewedAt)
-                        const isApproved = n.type === "approved"
+                        const unread = isUnread(n.timestamp)
                         return (
                           <Link
                             key={n.id}
-                            href="/supplier"
+                            href={n.href}
                             onClick={() => setNotifOpen(false)}
                             className={cn(
                               "relative flex items-start gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 pl-5 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]",
@@ -682,20 +739,18 @@ export function SiteHeader() {
                                 <span
                                   className={cn(
                                     "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
-                                    isApproved
-                                      ? "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]"
-                                      : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]"
+                                    BADGE_CLASS[n.variant]
                                   )}
                                 >
-                                  {isApproved ? "Được duyệt" : "Từ chối"}
+                                  {n.badgeLabel}
                                 </span>
                                 <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
-                                  {formatRelative(n.reviewedAt)}
+                                  {formatRelative(n.timestamp)}
                                 </span>
                               </p>
-                              {!isApproved && n.rejectReason && (
+                              {n.detail && (
                                 <p className="mt-1 truncate text-[11px] text-[oklch(0.55_0.024_60)] italic">
-                                  Lý do: {n.rejectReason}
+                                  Lý do: {n.detail}
                                 </p>
                               )}
                             </div>
@@ -707,7 +762,7 @@ export function SiteHeader() {
                   {notifications.length > 0 && (
                     <div className="border-t border-[oklch(0.9_0.014_72)] p-2">
                       <Link
-                        href="/supplier"
+                        href={isSupplierRole ? "/supplier" : "/account/ordered"}
                         onClick={() => setNotifOpen(false)}
                         className="flex w-full items-center justify-center rounded-sm py-2 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
                       >
@@ -777,12 +832,11 @@ export function SiteHeader() {
                   ) : (
                     <div className="overflow-y-auto">
                       {notifications.map((n) => {
-                        const unread = isUnread(n.reviewedAt)
-                        const isApproved = n.type === "approved"
+                        const unread = isUnread(n.timestamp)
                         return (
                           <SheetClose key={n.id} asChild>
                             <Link
-                              href="/supplier"
+                              href={n.href}
                               className={cn(
                                 "relative flex items-start gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 pl-6 transition-colors last:border-0 hover:bg-[oklch(0.97_0.012_78)]",
                                 unread && "bg-[oklch(0.96_0.012_78)]"
@@ -807,20 +861,18 @@ export function SiteHeader() {
                                   <span
                                     className={cn(
                                       "inline-flex items-center gap-1 rounded-sm px-1.5 py-0.5 text-[10px] font-semibold tracking-[0.12em] uppercase",
-                                      isApproved
-                                        ? "bg-[oklch(0.91_0.022_75)] text-[oklch(0.34_0.03_55)]"
-                                        : "bg-[oklch(0.18_0.014_55)] text-[oklch(0.94_0.014_75)]"
+                                      BADGE_CLASS[n.variant]
                                     )}
                                   >
-                                    {isApproved ? "Được duyệt" : "Từ chối"}
+                                    {n.badgeLabel}
                                   </span>
                                   <span className="text-[11px] text-[oklch(0.55_0.024_60)]">
-                                    {formatRelative(n.reviewedAt)}
+                                    {formatRelative(n.timestamp)}
                                   </span>
                                 </p>
-                                {!isApproved && n.rejectReason && (
+                                {n.detail && (
                                   <p className="mt-1 line-clamp-2 text-[11px] text-[oklch(0.55_0.024_60)] italic">
-                                    Lý do: {n.rejectReason}
+                                    Lý do: {n.detail}
                                   </p>
                                 )}
                               </div>
@@ -834,7 +886,7 @@ export function SiteHeader() {
                     <div className="border-t border-[oklch(0.9_0.014_72)] p-3">
                       <SheetClose asChild>
                         <Link
-                          href="/supplier"
+                          href={isSupplierRole ? "/supplier" : "/account/ordered"}
                           className="flex w-full items-center justify-center rounded-sm py-2.5 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
                         >
                           Xem tất cả →
@@ -844,7 +896,12 @@ export function SiteHeader() {
                   )}
                 </SheetContent>
               </Sheet>
+            </>
+          )}
 
+          {/* Supplier-only: pending orders dropdown + chevron */}
+          {authed && user?.role === "supplier" && (
+            <>
               <DropdownMenu
                 modal={false}
                 open={supplierDropdownOpen}

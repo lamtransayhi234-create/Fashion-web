@@ -53,7 +53,7 @@ export function useGetOrders(scope?: "mine" | "shop" | "all") {
         : "mine")
 
   return useQuery({
-    queryKey: queryKeys.orders.list(derivedScope),
+    queryKey: queryKeys.orders.list(derivedScope, user?.id ?? ""),
     enabled: !!user,
     queryFn: async (): Promise<Order[]> => {
       if (!user) return []

@@ -10,3 +10,15 @@ export type SupplierNotification = {
   rejectReason?: string
   reviewedAt: string                  // ISO timestamp
 }
+
+/**
+ * Notification cho khách (role=user) khi supplier đổi trạng thái đơn.
+ * Derive từ bảng orders + cột status_updated_at (migration 0006).
+ */
+export type UserOrderNotification = {
+  id: string                          // order id
+  status: "confirmed" | "completed" | "cancelled"
+  productName: string
+  productSrc: string
+  statusUpdatedAt: string             // ISO timestamp
+}

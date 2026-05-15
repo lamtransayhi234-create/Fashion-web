@@ -1,3 +1,5 @@
 export { useGetSupplierNotifications } from "./useGetSupplierNotifications"
+export { useGetUserOrderNotifications } from "./useGetUserOrderNotifications"
 export { useNotificationsLastSeen } from "./useNotificationsLastSeen"
-export type { SupplierNotification } from "./types"
+export type { NotificationScope } from "./useNotificationsLastSeen"
+export type { SupplierNotification, UserOrderNotification } from "./types"

@@ -15,8 +15,8 @@ export const queryKeys = {
   },
   orders: {
     all: ["orders"] as const,
-    list: (scope: "mine" | "shop" | "all") =>
-      [...queryKeys.orders.all, "list", scope] as const,
+    list: (scope: "mine" | "shop" | "all", userId: string) =>
+      [...queryKeys.orders.all, "list", scope, userId] as const,
   },
   whitelist: {
     all: ["whitelist"] as const,
@@ -30,5 +30,7 @@ export const queryKeys = {
     all: ["notifications"] as const,
     supplier: (userId: string) =>
       [...queryKeys.notifications.all, "supplier", userId] as const,
+    userOrders: (userId: string) =>
+      [...queryKeys.notifications.all, "userOrders", userId] as const,
   },
 } as const

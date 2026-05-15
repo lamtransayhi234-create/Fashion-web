@@ -20,6 +20,7 @@ export function useUpdateOrderStatus() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: queryKeys.orders.all })
+      qc.invalidateQueries({ queryKey: queryKeys.notifications.all })
     },
   })
 }
