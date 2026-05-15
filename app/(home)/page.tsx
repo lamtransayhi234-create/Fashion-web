@@ -15,8 +15,10 @@ import {
   Star,
 } from "lucide-react"
 
-import { ProductCard, type ProductCardProps } from "@/components/product-card"
-import { products as allProducts, providers } from "@/lib/data/products"
+import {
+  products as allProducts,
+  type ProductType,
+} from "@/lib/data/products"
 import {
   CategoryCard,
   type CategoryCardProps,
@@ -27,6 +29,9 @@ import {
   type TestimonialCardProps,
 } from "@/components/testimonial-card"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { HeroCtas } from "./hero-ctas"
+import { HotProducts } from "./hot-products"
 
 const STEPS: StepCardProps[] = [
   {
@@ -59,66 +64,32 @@ const STEPS: StepCardProps[] = [
   },
 ]
 
-const CATEGORIES: CategoryCardProps[] = [
-  {
-    name: "Váy dự tiệc",
-    itemCount: "1.2k+ món",
-    accent: "pink",
-    image: "/Home-Img/img-danh-muc/image-5.webp",
-    imageAlt: "Elegant evening gown with sequin details",
-  },
-  {
-    name: "Áo croptop",
-    itemCount: "850+ món",
-    accent: "peach",
-    image: "/Home-Img/img-danh-muc/image-2.png",
-    imageAlt: "Trendy crop top and denim outfit",
-  },
-  {
-    name: "Đồ đi biển",
-    itemCount: "540+ món",
-    accent: "mint",
-    image: "/Home-Img/img-danh-muc/image-1.webp",
-    imageAlt: "Beach cover-up on sunny deck",
-  },
-  {
-    name: "Y2K Style",
-    itemCount: "2.1k+ món",
-    accent: "lilac",
-    image: "/Home-Img/img-danh-muc/image-3.webp",
-    imageAlt: "Oversized streetwear under neon lights",
-  },
-  {
-    name: "Vintage 90s",
-    itemCount: "930+ món",
-    accent: "butter",
-    image: "/Home-Img/img-danh-muc/image-4.webp",
-    imageAlt: "Vintage floral dress with nostalgic mood",
-  },
+const HEADER_CATEGORIES: {
+  name: ProductType
+  accent: NonNullable<CategoryCardProps["accent"]>
+}[] = [
+  { name: "Váy & Đầm", accent: "pink" },
+  { name: "Áo kiểu", accent: "peach" },
+  { name: "Chân váy", accent: "lilac" },
+  { name: "Set", accent: "mint" },
+  { name: "Giày Dép", accent: "butter" },
+  { name: "Mũ & Nón", accent: "pink" },
+  { name: "Trang sức", accent: "peach" },
 ]
 
-const HOT_PRODUCT_IDS = ["p090", "p091", "p092", "p093"]
-
-const PRODUCTS: ProductCardProps[] = HOT_PRODUCT_IDS.map((id) => {
-  const p = allProducts.find((x) => x.id === id)!
-  const provider = providers.find((v) => v.id === p.providerId)!
-  return {
-    product: p,
-    pricePerDay: `${p.rentalPrice.toLocaleString("vi-VN")}đ/ngày`,
-    image: p.src,
-    imageAlt: p.name,
-    owner: {
-      handle: provider.handle,
-      avatar: provider.avatar,
-      location: provider.location,
-    },
-    rating: p.rating,
-    availability:
-      p.status === "available"
-        ? { label: "Sẵn sàng ngay", tone: "success" as const }
-        : { label: "Hết hàng", tone: "danger" as const },
-  }
-})
+const CATEGORIES: (CategoryCardProps & { href: string })[] =
+  HEADER_CATEGORIES.map(({ name, accent }) => {
+    const matching = allProducts.filter((p) => p.type === name)
+    const cover = matching[0]?.src ?? "/Home-Img/img-danh-muc/image-1.webp"
+    return {
+      name,
+      itemCount: `${matching.length} món`,
+      accent,
+      image: cover,
+      imageAlt: name,
+      href: `/products?type=${encodeURIComponent(name)}`,
+    }
+  })
 
 const TESTIMONIALS: TestimonialCardProps[] = [
   {
@@ -210,36 +181,7 @@ export default function HomePage() {
             tục, mà chi phí chỉ bằng một nửa so với thị trường.
           </p> */}
 
-            <div className="mt-8 flex flex-wrap gap-3">
-              <Button className="ribbon-tan group/btn relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full px-6 py-3 text-[11px] font-semibold tracking-[0.22em] uppercase transition-[transform,box-shadow] duration-500 ease-out hover:-translate-y-0.5 hover:shadow-[0_20px_44px_-14px_oklch(0.34_0.03_55/0.55)] active:translate-y-0 active:duration-100 lg:w-auto">
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 -translate-x-[120%] skew-x-[-18deg] bg-[linear-gradient(90deg,transparent_0%,oklch(0.97_0.012_78/0.35)_45%,oklch(0.97_0.012_78/0.55)_50%,oklch(0.97_0.012_78/0.35)_55%,transparent_100%)] transition-transform duration-[900ms] ease-out group-hover/btn:translate-x-[120%]"
-                />
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 rounded-full opacity-0 ring-1 ring-[oklch(0.97_0.012_78/0.22)] transition-opacity duration-500 ring-inset group-hover/btn:opacity-100"
-                />
-                <span className="relative flex items-center gap-3">
-                  Khám phá tủ đồ
-                  <ArrowRight className="size-4 transition-transform duration-300 ease-out group-hover/btn:translate-x-1.5" />
-                </span>
-              </Button>
-
-              <Button
-                variant="outline"
-                className="group/btn2 relative isolate h-auto w-full cursor-pointer overflow-hidden rounded-full border !border-[oklch(0.18_0.014_55)] bg-transparent px-6 py-3 text-[11px] font-semibold tracking-[0.22em] text-[oklch(0.18_0.014_55)] uppercase transition-[transform,box-shadow] duration-300 ease-out hover:-translate-y-0.5 hover:shadow-[0_14px_36px_-16px_oklch(0.18_0.014_55/0.5)] active:translate-y-0 lg:w-auto"
-              >
-                <span
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 translate-y-full bg-[oklch(0.18_0.014_55)] transition-transform duration-500 ease-[cubic-bezier(0.65,0,0.35,1)] group-hover/btn2:translate-y-0"
-                />
-                <span className="relative flex items-center gap-3 transition-colors duration-500 group-hover/btn2:text-[oklch(0.97_0.012_78)]">
-                  Cho thuê đồ
-                  <Heart className="size-4 transition-all duration-500 ease-out group-hover/btn2:scale-110 group-hover/btn2:fill-[oklch(0.6_0.062_60)] group-hover/btn2:stroke-[oklch(0.6_0.062_60)]" />
-                </span>
-              </Button>
-            </div>
+            <HeroCtas />
 
             <div className="mt-10 grid w-full grid-cols-3 gap-0 divide-x divide-[oklch(0.86_0.018_70)] border-y border-[oklch(0.86_0.018_70)] py-5 lg:mt-12">
               <div className="px-6 text-center">
@@ -448,15 +390,17 @@ export default function HomePage() {
             </div>
 
             <div className="pt-4">
-              <Button
-                variant="outline"
-                className="group/btn h-auto w-full rounded-full border border-[oklch(0.78_0.04_70)] bg-transparent px-7 py-3 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.97_0.012_78)] uppercase transition-all duration-300 hover:border-[oklch(0.6_0.062_60)] hover:bg-[oklch(0.6_0.062_60)] lg:w-auto"
-              >
-                <span className="flex items-center gap-3">
-                  Tìm hiểu thêm
-                  <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
-                </span>
-              </Button>
+              <Link href="/about" className="inline-block w-full lg:w-auto">
+                <Button
+                  variant="outline"
+                  className="group/btn h-auto w-full rounded-full border border-[oklch(0.78_0.04_70)] bg-transparent px-7 py-3 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.97_0.012_78)] uppercase transition-all duration-300 hover:border-[oklch(0.6_0.062_60)] hover:bg-[oklch(0.6_0.062_60)] lg:w-auto"
+                >
+                  <span className="flex items-center gap-3">
+                    Tìm hiểu thêm
+                    <ArrowRight className="size-4 transition-transform duration-300 group-hover/btn:translate-x-1" />
+                  </span>
+                </Button>
+              </Link>
             </div>
           </div>
         </div>
@@ -549,17 +493,19 @@ export default function HomePage() {
               </span>
             </h2>
           </div>
-          <a
-            href="#"
+          <Link
+            href="/products"
             className="group flex items-center gap-3 border-b border-[oklch(0.18_0.014_55)] pb-1 text-[12px] font-semibold tracking-[0.22em] text-[oklch(0.18_0.014_55)] uppercase transition-all hover:gap-4"
           >
             Xem tất cả
             <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
-          </a>
+          </Link>
         </div>
         <div className="relative mx-auto no-scrollbar flex gap-6 overflow-x-auto px-8 pb-8 lg:max-w-[1200px] lg:px-12 xl:max-w-[1535px]">
-          {CATEGORIES.map((category) => (
-            <CategoryCard key={category.name} {...category} />
+          {CATEGORIES.map(({ href, ...category }) => (
+            <Link key={category.name} href={href} className="flex-shrink-0">
+              <CategoryCard {...category} />
+            </Link>
           ))}
           <div className="flex h-72 w-[220px] flex-shrink-0 flex-col items-center justify-center gap-3 rounded-md border border-dashed border-[oklch(0.6_0.062_60)] bg-[oklch(0.99_0.008_78)]/60 p-6 text-center backdrop-blur">
             <div className="flex size-12 items-center justify-center rounded-full bg-[oklch(0.18_0.014_55)] text-[oklch(0.97_0.012_78)]">
@@ -596,29 +542,8 @@ export default function HomePage() {
               <span className="text-[oklch(0.6_0.062_60)] italic">Pieces</span>
             </h2>
           </div>
-          {/* <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
-              aria-label="Trang trước"
-              className="size-11 rounded-full border border-[oklch(0.34_0.03_55)] bg-transparent text-[oklch(0.34_0.03_55)] hover:border-[oklch(0.18_0.014_55)] hover:bg-[oklch(0.18_0.014_55)] hover:text-[oklch(0.97_0.012_78)]"
-            >
-              <ChevronLeft className="size-5" />
-            </Button>
-            <Button
-              size="icon"
-              aria-label="Trang sau"
-              className="ribbon-tan size-11 rounded-full"
-            >
-              <ChevronRight className="size-5" />
-            </Button>
-          </div> */}
         </div>
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
-          {PRODUCTS.map((product) => (
-            <ProductCard key={product.product.id} {...product} />
-          ))}
-        </div>
+        <HotProducts />
       </section>
 
       {/* ─────────── WHY STYLELOOP ─────────── */}
