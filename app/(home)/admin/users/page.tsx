@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Shield, Users } from "lucide-react"
+import { Search, Shield, Users } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth-store"
 import { useGetAdminUsers } from "@/lib/queries/users"
@@ -62,11 +62,27 @@ export default function AdminUsersPage() {
 
   const { data: rows = [], isLoading } = useGetAdminUsers()
 
+  const [selectedRole, setSelectedRole] = useState<
+    "all" | "user" | "supplier"
+  >("all")
+  const [searchQuery, setSearchQuery] = useState("")
+
   const stats = useMemo(() => {
     const userCount = rows.filter((r) => r.role === "user").length
     const supplierCount = rows.filter((r) => r.role === "supplier").length
     return { userCount, supplierCount }
   }, [rows])
+
+  const filteredRows = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase()
+    return rows.filter((r) => {
+      if (selectedRole !== "all" && r.role !== selectedRole) return false
+      if (!q) return true
+      return (
+        r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q)
+      )
+    })
+  }, [rows, selectedRole, searchQuery])
 
   useEffect(() => {
     if (!hydrated) return
@@ -143,8 +159,66 @@ export default function AdminUsersPage() {
           ))}
         </div>
 
+        {/* Filter row */}
+        <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Role chips */}
+          <div
+            className="flex gap-1 rounded-full p-1"
+            style={{ background: TK.muted, border: `1px solid ${TK.border}` }}
+          >
+            {(
+              [
+                { key: "all", label: "Tất cả" },
+                { key: "user", label: "Khách thuê" },
+                { key: "supplier", label: "Cung cấp" },
+              ] as const
+            ).map((c) => (
+              <button
+                key={c.key}
+                type="button"
+                onClick={() => setSelectedRole(c.key)}
+                className="rounded-full px-4 py-1.5 text-[11px] font-semibold tracking-[0.14em] uppercase transition-all"
+                style={{
+                  background:
+                    selectedRole === c.key ? TK.ink : "transparent",
+                  color:
+                    selectedRole === c.key
+                      ? "oklch(0.97 0.012 78)"
+                      : TK.sub,
+                }}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Search */}
+          <div
+            className="relative flex items-center sm:w-72"
+            style={{
+              background: TK.card,
+              border: `1px solid ${TK.border}`,
+              borderRadius: 9999,
+            }}
+          >
+            <Search
+              className="ml-3 size-4 shrink-0"
+              style={{ color: TK.sub }}
+              strokeWidth={1.4}
+            />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Tìm theo tên / email"
+              className="w-full bg-transparent px-3 py-2 text-[13px] outline-none"
+              style={{ color: TK.ink }}
+            />
+          </div>
+        </div>
+
         {/* Table */}
-        {rows.length === 0 ? (
+        {filteredRows.length === 0 ? (
           <div
             className="flex flex-col items-center gap-4 rounded-md py-24 text-center"
             style={{ background: TK.card, border: `1px solid ${TK.border}` }}
@@ -163,7 +237,9 @@ export default function AdminUsersPage() {
               className="font-display text-[22px] font-medium"
               style={{ color: TK.ink }}
             >
-              Chưa có người dùng nào
+              {rows.length === 0
+                ? "Chưa có người dùng nào"
+                : "Không tìm thấy người dùng phù hợp"}
             </h2>
           </div>
         ) : (
@@ -187,7 +263,7 @@ export default function AdminUsersPage() {
               ))}
             </div>
             {/* Body rows */}
-            {rows.map((r) => {
+            {filteredRows.map((r) => {
               const badge = ROLE_BADGE[r.role]
               return (
                 <div
