@@ -117,20 +117,26 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
     }
     set({ hydrated: true })
 
-    // Subscribe cho logout/refresh giữa các tab
+    // Subscribe cho logout/refresh giữa các tab.
+    // ⚠️ Callback PHẢI sync — không await trong này, sẽ deadlock auth lock
+    // (https://supabase.com/docs/reference/javascript/auth-onauthstatechange).
+    // Async work (fetch profile) defer ra ngoài bằng setTimeout(…, 0).
     if (!unsubscribe) {
-      const { data: sub } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
         if (event === "SIGNED_OUT" || !session) {
           set({ isAuthenticated: false, user: null })
           return
         }
         if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED" || event === "USER_UPDATED") {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("*")
-            .eq("id", session.user.id)
-            .single()
-          if (profile) set({ isAuthenticated: true, user: profileToUser(profile) })
+          const userId = session.user.id
+          setTimeout(async () => {
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("*")
+              .eq("id", userId)
+              .single()
+            if (profile) set({ isAuthenticated: true, user: profileToUser(profile) })
+          }, 0)
         }
       })
       unsubscribe = () => sub.subscription.unsubscribe()

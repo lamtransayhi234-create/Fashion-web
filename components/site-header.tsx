@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Heart,
   LayoutDashboard,
+  Loader2,
   LogIn,
   LogOut,
   Menu,
@@ -29,6 +30,7 @@ import {
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Skeleton } from "@/components/ui/skeleton"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   DropdownMenu,
@@ -162,7 +164,7 @@ export function SiteHeader() {
   const user = useAuthStore((s) => s.user)
   const logout = useAuthStore((s) => s.logout)
   const toggleWhitelist = useToggleWhitelist()
-  const { data: wishlist = [] } = useGetWhitelist()
+  const { data: wishlist = [], isLoading: wishlistLoading } = useGetWhitelist()
   const { data: orders = [] } = useGetOrders()
   const pendingOrders =
     user?.role === "supplier"
@@ -1349,7 +1351,23 @@ export function SiteHeader() {
                     )}
                   </div>
 
-                  {wishlist.length === 0 ? (
+                  {wishlistLoading ? (
+                    <div className="max-h-[400px] overflow-y-auto">
+                      {[0, 1, 2].map((i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-3 py-2.5 last:border-0"
+                        >
+                          <Skeleton className="size-12 shrink-0 rounded-md" />
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <Skeleton className="h-3.5 w-3/4 rounded-sm" />
+                            <Skeleton className="h-3 w-1/3 rounded-sm" />
+                          </div>
+                          <Skeleton className="size-7 shrink-0 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : wishlist.length === 0 ? (
                     <div className="flex flex-col items-center gap-2 py-10 text-center">
                       <Heart
                         className="size-8 text-[oklch(0.78_0.04_70)]"
@@ -1393,14 +1411,29 @@ export function SiteHeader() {
                               </p>
                             </div>
                           </Link>
-                          <button
-                            type="button"
-                            onClick={() => toggleWhitelist.mutate(product)}
-                            className="flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
-                            aria-label="Bỏ yêu thích"
-                          >
-                            <X className="size-3.5" />
-                          </button>
+                          {(() => {
+                            const isRemoving =
+                              toggleWhitelist.isPending &&
+                              toggleWhitelist.variables?.id === product.id
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isRemoving) return
+                                  toggleWhitelist.mutate(product)
+                                }}
+                                disabled={isRemoving}
+                                className="flex size-7 shrink-0 items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)] disabled:cursor-wait disabled:opacity-60 enabled:cursor-pointer"
+                                aria-label="Bỏ yêu thích"
+                              >
+                                {isRemoving ? (
+                                  <Loader2 className="size-3.5 animate-spin" />
+                                ) : (
+                                  <X className="size-3.5" />
+                                )}
+                              </button>
+                            )
+                          })()}
                         </div>
                       ))}
                     </div>
@@ -1451,7 +1484,23 @@ export function SiteHeader() {
                     </SheetClose>
                   </div>
 
-                  {wishlist.length === 0 ? (
+                  {wishlistLoading ? (
+                    <div className="overflow-y-auto">
+                      {[0, 1, 2, 3].map((i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-3 border-b border-[oklch(0.95_0.012_76)] px-4 py-3 last:border-0"
+                        >
+                          <Skeleton className="size-14 shrink-0 rounded-md" />
+                          <div className="min-w-0 flex-1 space-y-1.5">
+                            <Skeleton className="h-3.5 w-3/4 rounded-sm" />
+                            <Skeleton className="h-3 w-1/3 rounded-sm" />
+                          </div>
+                          <Skeleton className="size-8 shrink-0 rounded-full" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : wishlist.length === 0 ? (
                     <div className="flex flex-col items-center gap-3 py-16 text-center">
                       <Heart
                         className="size-10 text-[oklch(0.78_0.04_70)]"
@@ -1497,14 +1546,29 @@ export function SiteHeader() {
                               </div>
                             </Link>
                           </SheetClose>
-                          <button
-                            type="button"
-                            onClick={() => toggleWhitelist.mutate(product)}
-                            className="flex size-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)]"
-                            aria-label="Bỏ yêu thích"
-                          >
-                            <X className="size-3.5" />
-                          </button>
+                          {(() => {
+                            const isRemoving =
+                              toggleWhitelist.isPending &&
+                              toggleWhitelist.variables?.id === product.id
+                            return (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (isRemoving) return
+                                  toggleWhitelist.mutate(product)
+                                }}
+                                disabled={isRemoving}
+                                className="flex size-8 shrink-0 items-center justify-center rounded-full text-[oklch(0.55_0.024_60)] transition-colors hover:bg-[oklch(0.94_0.014_75)] hover:text-[oklch(0.45_0.06_30)] disabled:cursor-wait disabled:opacity-60 enabled:cursor-pointer"
+                                aria-label="Bỏ yêu thích"
+                              >
+                                {isRemoving ? (
+                                  <Loader2 className="size-3.5 animate-spin" />
+                                ) : (
+                                  <X className="size-3.5" />
+                                )}
+                              </button>
+                            )
+                          })()}
                         </div>
                       ))}
                     </div>

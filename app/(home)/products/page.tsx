@@ -17,6 +17,7 @@ import {
   Tag,
   CheckCircle2,
   Heart,
+  Loader2,
 } from "lucide-react"
 
 import {
@@ -1114,38 +1115,55 @@ function ProductsInner() {
                                 -{savings}%
                               </span>
                             </div>
-                            {isCustomer && (
-                              <button
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  toggleWhitelist.mutate(product)
-                                }}
-                                className="absolute top-2.5 right-2.5 flex size-8 cursor-pointer items-center justify-center rounded-full transition-all duration-200"
-                                style={{
-                                  background: isWishlisted
-                                    ? TK.camel
-                                    : "oklch(0.97 0.012 78 / 0.88)",
-                                  backdropFilter: "blur(4px)",
-                                  boxShadow:
-                                    "0 2px 8px oklch(0.18 0.014 55 / 0.18)",
-                                }}
-                                aria-label={
-                                  isWishlisted ? "Bỏ yêu thích" : "Yêu thích"
-                                }
-                              >
-                                <Heart
-                                  className="size-4 transition-all duration-200"
-                                  style={{
-                                    stroke: isWishlisted ? TK.cream : TK.muted,
-                                    fill: isWishlisted
-                                      ? TK.cream
-                                      : "transparent",
+                            {isCustomer && (() => {
+                              const isToggling =
+                                toggleWhitelist.isPending &&
+                                toggleWhitelist.variables?.id === product.id
+                              return (
+                                <button
+                                  onClick={(e) => {
+                                    e.preventDefault()
+                                    e.stopPropagation()
+                                    if (isToggling) return
+                                    toggleWhitelist.mutate(product)
                                   }}
-                                  strokeWidth={1.8}
-                                />
-                              </button>
-                            )}
+                                  disabled={isToggling}
+                                  className="absolute top-2.5 right-2.5 flex size-8 items-center justify-center rounded-full transition-all duration-200 disabled:cursor-wait disabled:opacity-80 enabled:cursor-pointer"
+                                  style={{
+                                    background: isWishlisted
+                                      ? TK.camel
+                                      : "oklch(0.97 0.012 78 / 0.88)",
+                                    backdropFilter: "blur(4px)",
+                                    boxShadow:
+                                      "0 2px 8px oklch(0.18 0.014 55 / 0.18)",
+                                  }}
+                                  aria-label={
+                                    isWishlisted ? "Bỏ yêu thích" : "Yêu thích"
+                                  }
+                                >
+                                  {isToggling ? (
+                                    <Loader2
+                                      className="size-4 animate-spin"
+                                      style={{
+                                        color: isWishlisted ? TK.cream : TK.muted,
+                                      }}
+                                      strokeWidth={1.8}
+                                    />
+                                  ) : (
+                                    <Heart
+                                      className="size-4 transition-all duration-200"
+                                      style={{
+                                        stroke: isWishlisted ? TK.cream : TK.muted,
+                                        fill: isWishlisted
+                                          ? TK.cream
+                                          : "transparent",
+                                      }}
+                                      strokeWidth={1.8}
+                                    />
+                                  )}
+                                </button>
+                              )
+                            })()}
                             {!oos && (
                               <div className="absolute inset-x-2.5 bottom-2.5 translate-y-2 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
                                 <Link
