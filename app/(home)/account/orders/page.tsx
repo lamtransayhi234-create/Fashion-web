@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { parseISO, isAfter, isBefore, isEqual, format } from "date-fns"
@@ -106,12 +106,14 @@ export default function OrdersPage() {
 
   const [filter, setFilter] = useState<RentalStatus | "all">("all")
 
-  if (!hydrated || ordersLoading) return <AccountOrdersSkeleton />
+  useEffect(() => {
+    if (hydrated && (!isAuthenticated || !user)) {
+      router.replace("/login")
+    }
+  }, [hydrated, isAuthenticated, user, router])
 
-  if (!isAuthenticated || !user) {
-    router.replace("/login")
-    return null
-  }
+  if (!hydrated || ordersLoading) return <AccountOrdersSkeleton />
+  if (!isAuthenticated || !user) return <AccountOrdersSkeleton />
 
   const activeCount = orders.filter((o) => getRentalStatus(o) === "active").length
 

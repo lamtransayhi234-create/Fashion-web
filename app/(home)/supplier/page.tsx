@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   Package,
@@ -184,15 +184,14 @@ export default function SupplierPage() {
   const [submitting, setSubmitting] = useState(false)
   const [successDialog, setSuccessDialog] = useState(false)
 
+  useEffect(() => {
+    if (!hydrated) return
+    if (!user) router.replace("/login")
+    else if (user.role !== "supplier") router.replace("/")
+  }, [hydrated, user, router])
+
   if (!hydrated || subsLoading) return <SupplierSkeleton />
-  if (!user) {
-    router.replace("/login")
-    return null
-  }
-  if (user.role !== "supplier") {
-    router.replace("/")
-    return null
-  }
+  if (!user || user.role !== "supplier") return <SupplierSkeleton />
 
   const safeUser = user
   const myProducts = submittedProducts.filter(
@@ -664,7 +663,7 @@ export default function SupplierPage() {
                   (p) =>
                     statusFilter === "all" || p.uploadStatus === statusFilter
                 ).length === 0 && (
-                  <div className="flex flex-col items-center gap-3 py-16 text-center">
+                  <div className="col-span-full flex flex-col items-center gap-3 py-16 text-center">
                     <p
                       className="font-display text-[18px] font-medium"
                       style={{ color: TK.ink }}

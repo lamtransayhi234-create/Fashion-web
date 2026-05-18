@@ -54,13 +54,18 @@ function LoginInner() {
     e.preventDefault()
     setError(null)
     setLoading(true)
-    const res = await login(email, password)
-    setLoading(false)
-    if (!res.success) {
-      setError(res.message)
-      return
+    try {
+      const res = await login(email, password)
+      if (!res.success) {
+        setError(res.message)
+        return
+      }
+      router.push(redirect)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng nhập thất bại.")
+    } finally {
+      setLoading(false)
     }
-    router.push(redirect)
   }
 
   const fillDemo = (acc: (typeof DEMO_ACCOUNTS)[number]) => {

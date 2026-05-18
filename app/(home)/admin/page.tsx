@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import {
   CheckCircle2,
@@ -294,15 +294,14 @@ export default function AdminPage() {
     reason: "",
   })
 
+  useEffect(() => {
+    if (!hydrated) return
+    if (!user) router.replace("/login")
+    else if (user.role !== "admin") router.replace("/")
+  }, [hydrated, user, router])
+
   if (!hydrated || subsLoading) return <AdminSkeleton />
-  if (!user) {
-    router.replace("/login")
-    return null
-  }
-  if (user.role !== "admin") {
-    router.replace("/")
-    return null
-  }
+  if (!user || user.role !== "admin") return <AdminSkeleton />
 
   const pending = submittedProducts.filter((p) => p.uploadStatus === "pending")
   const done = submittedProducts.filter((p) => p.uploadStatus !== "pending")

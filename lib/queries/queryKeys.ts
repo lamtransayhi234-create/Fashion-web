@@ -11,7 +11,8 @@ export const queryKeys = {
   },
   submissions: {
     all: ["submissions"] as const,
-    list: () => [...queryKeys.submissions.all, "list"] as const,
+    list: (userId: string) =>
+      [...queryKeys.submissions.all, "list", userId] as const,
   },
   orders: {
     all: ["orders"] as const,

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import {
@@ -267,8 +267,12 @@ export default function AccountPage() {
   const { data: whitelist = [] } = useGetWhitelist()
   const hydrated = useAuthStore((s) => s.hydrated)
 
+  useEffect(() => {
+    if (hydrated && !user) router.replace("/login")
+  }, [hydrated, user, router])
+
   if (!hydrated) return null
-  if (!user) { router.replace("/login"); return null }
+  if (!user) return null
 
   const RoleIcon = user.role === "admin" ? Shield : user.role === "supplier" ? Store : User
 

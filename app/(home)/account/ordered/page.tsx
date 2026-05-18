@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { parseISO, isAfter, isBefore, format } from "date-fns"
 import {
@@ -262,15 +262,14 @@ export default function SupplierOrdersPage() {
 
   const hydrated = useAuthStore((s) => s.hydrated)
 
+  useEffect(() => {
+    if (!hydrated) return
+    if (!user) router.replace("/login")
+    else if (user.role !== "supplier") router.replace("/")
+  }, [hydrated, user, router])
+
   if (!hydrated || ordersLoading) return <AccountOrderedSkeleton />
-  if (!user) {
-    router.replace("/login")
-    return null
-  }
-  if (user.role !== "supplier") {
-    router.replace("/")
-    return null
-  }
+  if (!user || user.role !== "supplier") return <AccountOrderedSkeleton />
 
   const safeUser = user
 

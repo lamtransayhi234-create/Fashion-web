@@ -72,20 +72,25 @@ export default function RegisterPage() {
       return
     }
     setLoading(true)
-    const res = await register({
-      email,
-      password,
-      name,
-      role,
-      shopName: role === "supplier" ? shopName.trim() : undefined,
-      phone: role === "supplier" ? phone.trim() : undefined,
-    })
-    setLoading(false)
-    if (!res.success) {
-      setError(res.message)
-      return
+    try {
+      const res = await register({
+        email,
+        password,
+        name,
+        role,
+        shopName: role === "supplier" ? shopName.trim() : undefined,
+        phone: role === "supplier" ? phone.trim() : undefined,
+      })
+      if (!res.success) {
+        setError(res.message)
+        return
+      }
+      router.push("/")
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Đăng ký thất bại.")
+    } finally {
+      setLoading(false)
     }
-    router.push("/")
   }
 
   if (hydrated && isAuthenticated) return null

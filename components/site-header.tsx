@@ -199,7 +199,7 @@ export function SiteHeader() {
         const meta = USER_ORDER_LABEL[n.status]
         return {
           id: n.id,
-          href: "/account/ordered",
+          href: "/account/orders",
           productName: n.productName,
           productSrc: n.productSrc,
           timestamp: n.statusUpdatedAt,
@@ -241,10 +241,10 @@ export function SiteHeader() {
     }
   }, [mobileSearchOpen])
 
-  const handleLogout = () => {
-    logout()
+  const handleLogout = async () => {
     setAccountOpen(false)
-    // router.push("/")
+    await logout()
+    router.replace("/")
   }
 
   const handleSearch = useCallback(
@@ -762,7 +762,7 @@ export function SiteHeader() {
                   {notifications.length > 0 && (
                     <div className="border-t border-[oklch(0.9_0.014_72)] p-2">
                       <Link
-                        href={isSupplierRole ? "/supplier" : "/account/ordered"}
+                        href={isSupplierRole ? "/supplier" : "/account/orders"}
                         onClick={() => setNotifOpen(false)}
                         className="flex w-full items-center justify-center rounded-sm py-2 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
                       >
@@ -886,7 +886,7 @@ export function SiteHeader() {
                     <div className="border-t border-[oklch(0.9_0.014_72)] p-3">
                       <SheetClose asChild>
                         <Link
-                          href={isSupplierRole ? "/supplier" : "/account/ordered"}
+                          href={isSupplierRole ? "/supplier" : "/account/orders"}
                           className="flex w-full items-center justify-center rounded-sm py-2.5 text-[11px] font-semibold tracking-[0.14em] text-[oklch(0.6_0.062_60)] uppercase transition-colors hover:bg-[oklch(0.94_0.014_75)]"
                         >
                           Xem tất cả →

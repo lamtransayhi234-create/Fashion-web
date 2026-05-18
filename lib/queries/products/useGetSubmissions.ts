@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query"
 
 import { queryKeys } from "@/lib/queries/queryKeys"
 import { getSupabase } from "@/lib/supabase/client"
+import { useAuthStore } from "@/lib/store/auth-store"
 import type { Database } from "@/lib/supabase/types"
 import type {
   ProductCategory,
@@ -39,9 +40,12 @@ const rowToSubmission = (r: SubRowWithSupplier): SubmittedProduct => ({
 })
 
 export function useGetSubmissions() {
+  const user = useAuthStore((s) => s.user)
   return useQuery({
-    queryKey: queryKeys.submissions.list(),
+    queryKey: queryKeys.submissions.list(user?.id ?? ""),
+    enabled: !!user,
     queryFn: async (): Promise<SubmittedProduct[]> => {
+      if (!user) return []
       const { data, error } = await getSupabase()
         .from("product_submissions")
         .select(

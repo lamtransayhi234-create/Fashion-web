@@ -138,54 +138,75 @@ export const useAuthStore = create<AuthState>()((set, get) => ({
   },
 
   login: async (email, password) => {
-    const supabase = getSupabase()
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email: email.trim().toLowerCase(),
-      password,
-    })
-    if (error || !data.user) {
-      return { success: false, message: "Email hoặc mật khẩu không đúng." }
+    try {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.trim().toLowerCase(),
+        password,
+      })
+      if (error || !data.user) {
+        return { success: false, message: "Email hoặc mật khẩu không đúng." }
+      }
+      const { data: profile } = await supabase
+        .from("profiles").select("*").eq("id", data.user.id).single()
+      if (!profile) return { success: false, message: "Không tìm thấy hồ sơ." }
+      const u = profileToUser(profile)
+      set({ isAuthenticated: true, user: u })
+      return { success: true, user: u }
+    } catch (err) {
+      return {
+        success: false,
+        message: err instanceof Error ? err.message : "Đăng nhập thất bại, vui lòng thử lại.",
+      }
     }
-    const { data: profile } = await supabase
-      .from("profiles").select("*").eq("id", data.user.id).single()
-    if (!profile) return { success: false, message: "Không tìm thấy hồ sơ." }
-    const u = profileToUser(profile)
-    set({ isAuthenticated: true, user: u })
-    return { success: true, user: u }
   },
 
   logout: async () => {
-    await getSupabase().auth.signOut()
+    // Clear local state first so UI updates immediately, even if the network
+    // call to revoke the refresh token hangs. scope:'local' skips the server
+    // round-trip — the refresh token will expire on its own.
     set({ isAuthenticated: false, user: null })
+    try {
+      await getSupabase().auth.signOut({ scope: "local" })
+    } catch {
+      // ignore — local session is already gone
+    }
   },
 
   register: async ({ email, password, name, role = "user", shopName, phone }) => {
     if (!email || !password || !name) {
       return { success: false, message: "Vui lòng điền đầy đủ thông tin." }
     }
-    const supabase = getSupabase()
-    const { data, error } = await supabase.auth.signUp({
-      email: email.trim().toLowerCase(),
-      password,
-      options: {
-        data: { name, role, shop_name: shopName, phone },
-      },
-    })
-    if (error || !data.user) {
-      const msg = error?.message?.includes("already")
-        ? "Email này đã được đăng ký."
-        : error?.message ?? "Đăng ký thất bại."
-      return { success: false, message: msg }
-    }
+    try {
+      const supabase = getSupabase()
+      const { data, error } = await supabase.auth.signUp({
+        email: email.trim().toLowerCase(),
+        password,
+        options: {
+          data: { name, role, shop_name: shopName, phone },
+        },
+      })
+      if (error || !data.user) {
+        const msg = error?.message?.includes("already")
+          ? "Email này đã được đăng ký."
+          : error?.message ?? "Đăng ký thất bại."
+        return { success: false, message: msg }
+      }
 
-    const { data: profile } = await supabase
-      .from("profiles").select("*").eq("id", data.user.id).single()
-    if (!profile) {
-      return { success: false, message: "Tạo hồ sơ thất bại, vui lòng thử lại." }
+      const { data: profile } = await supabase
+        .from("profiles").select("*").eq("id", data.user.id).single()
+      if (!profile) {
+        return { success: false, message: "Tạo hồ sơ thất bại, vui lòng thử lại." }
+      }
+      const u = profileToUser(profile)
+      set({ isAuthenticated: true, user: u })
+      return { success: true, user: u }
+    } catch (err) {
+      return {
+        success: false,
+        message: err instanceof Error ? err.message : "Đăng ký thất bại, vui lòng thử lại.",
+      }
     }
-    const u = profileToUser(profile)
-    set({ isAuthenticated: true, user: u })
-    return { success: true, user: u }
   },
 
   updateProfile: async (patch) => {
