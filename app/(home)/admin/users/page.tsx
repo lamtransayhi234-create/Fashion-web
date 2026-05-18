@@ -2,10 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Search, Shield, Users } from "lucide-react"
+import { Search, Shield, Trash2, Users } from "lucide-react"
 
 import { useAuthStore } from "@/lib/store/auth-store"
-import { useGetAdminUsers } from "@/lib/queries/users"
+import { useDeleteUser, useGetAdminUsers } from "@/lib/queries/users"
+import type { AdminUserRow } from "@/lib/queries/users"
 import { AdminUsersSkeleton } from "@/components/skeletons"
 
 // ─── Tokens ───────────────────────────────────────────────────────────────────
@@ -55,6 +56,38 @@ const ROLE_BADGE = {
   },
 } as const
 
+function Dialog({
+  onBackdrop,
+  children,
+}: {
+  onBackdrop: () => void
+  children: React.ReactNode
+}) {
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center px-4"
+      style={{
+        background: "oklch(0.18 0.014 55 / 0.55)",
+        backdropFilter: "blur(6px)",
+      }}
+      onClick={onBackdrop}
+    >
+      <div
+        className="w-full max-w-sm overflow-hidden rounded-md"
+        style={{
+          background: TK.card,
+          border: `1px solid ${TK.border}`,
+          boxShadow: "0 32px 80px -20px oklch(0.18 0.014 55 / 0.4)",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="h-1 w-full" style={{ background: TK.camel }} />
+        {children}
+      </div>
+    </div>
+  )
+}
+
 export default function AdminUsersPage() {
   const router = useRouter()
   const user = useAuthStore((s) => s.user)
@@ -66,6 +99,31 @@ export default function AdminUsersPage() {
     "all" | "user" | "supplier"
   >("all")
   const [searchQuery, setSearchQuery] = useState("")
+
+  const deleteMutation = useDeleteUser()
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean
+    target: AdminUserRow | null
+  }>({ open: false, target: null })
+  const [toast, setToast] = useState<string | null>(null)
+
+  function showToast(msg: string) {
+    setToast(msg)
+    setTimeout(() => setToast(null), 3000)
+  }
+
+  async function confirmDelete() {
+    if (!deleteDialog.target) return
+    const name = deleteDialog.target.name
+    try {
+      await deleteMutation.mutateAsync(deleteDialog.target.id)
+      setDeleteDialog({ open: false, target: null })
+      showToast(`Đã xoá tài khoản ${name}`)
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "delete_failed"
+      showToast(`Xoá thất bại: ${msg}`)
+    }
+  }
 
   const stats = useMemo(() => {
     const userCount = rows.filter((r) => r.role === "user").length
@@ -95,6 +153,78 @@ export default function AdminUsersPage() {
 
   return (
     <main style={{ background: TK.bg, minHeight: "calc(100vh - 3.6rem)" }}>
+      {/* Toast */}
+      {toast && (
+        <div
+          className="fixed top-4 left-1/2 z-50 -translate-x-1/2 rounded-full px-6 py-3 text-[13px] font-semibold shadow-lg"
+          style={{ background: TK.ink, color: "oklch(0.97 0.012 78)" }}
+        >
+          {toast}
+        </div>
+      )}
+
+      {/* Delete dialog */}
+      {deleteDialog.open && deleteDialog.target && (
+        <Dialog
+          onBackdrop={() => setDeleteDialog({ open: false, target: null })}
+        >
+          <div className="px-8 py-8">
+            <div
+              className="mx-auto mb-5 flex size-14 items-center justify-center rounded-full"
+              style={{ background: TK.dangerBg }}
+            >
+              <Trash2
+                className="size-7"
+                style={{ color: TK.danger }}
+                strokeWidth={1.6}
+              />
+            </div>
+            <h2
+              className="text-center font-display text-[22px] font-medium"
+              style={{ color: TK.ink }}
+            >
+              Xoá tài khoản người dùng?
+            </h2>
+            <p
+              className="mt-2 text-center text-[13px]"
+              style={{ color: TK.sub }}
+            >
+              Hành động không thể hoàn tác. Toàn bộ dữ liệu của{" "}
+              <span className="font-semibold" style={{ color: TK.ink }}>
+                {deleteDialog.target.name}
+              </span>{" "}
+              sẽ bị xoá vĩnh viễn.
+            </p>
+            <div className="mt-7 flex gap-3">
+              <button
+                type="button"
+                onClick={confirmDelete}
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-full py-3 text-[12px] font-bold tracking-[0.14em] uppercase transition-all disabled:opacity-40"
+                style={{ background: TK.danger, color: "white" }}
+              >
+                {deleteMutation.isPending ? "Đang xoá..." : "Xác nhận xoá"}
+              </button>
+              <button
+                type="button"
+                onClick={() =>
+                  setDeleteDialog({ open: false, target: null })
+                }
+                disabled={deleteMutation.isPending}
+                className="flex-1 rounded-full py-3 text-[12px] font-semibold transition-opacity hover:opacity-70 disabled:opacity-40"
+                style={{
+                  border: `1px solid ${TK.border}`,
+                  color: TK.sub,
+                  background: "transparent",
+                }}
+              >
+                Đóng
+              </button>
+            </div>
+          </div>
+        </Dialog>
+      )}
+
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Eyebrow */}
         <div className="mb-6 flex items-center gap-3">
@@ -334,15 +464,17 @@ export default function AdminUsersPage() {
                     {fmtDate(r.created_at)}
                   </p>
 
-                  {/* Action — sẽ wire ở task sau */}
+                  {/* Action */}
                   <button
                     type="button"
-                    disabled
-                    className="flex size-8 items-center justify-center rounded-md opacity-30"
+                    onClick={() =>
+                      setDeleteDialog({ open: true, target: r })
+                    }
+                    className="flex size-8 cursor-pointer items-center justify-center rounded-md transition-colors hover:bg-[oklch(0.92_0.08_25/0.3)]"
                     style={{ color: TK.danger }}
-                    aria-label="Xoá (sắp sẵn sàng)"
+                    aria-label={`Xoá ${r.name}`}
                   >
-                    <span className="text-[14px]">🗑</span>
+                    <Trash2 className="size-4" strokeWidth={1.4} />
                   </button>
                 </div>
               )
