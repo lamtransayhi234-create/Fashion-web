@@ -22,6 +22,7 @@ import {
   Shield,
   Store,
   User,
+  Users,
   UserPlus,
   X,
 } from "lucide-react"
@@ -478,6 +479,12 @@ export function SiteHeader() {
                         href: "/admin",
                         icon: LayoutDashboard,
                         label: "Bảng điều khiển",
+                        show: user?.role === "admin",
+                      },
+                      {
+                        href: "/admin/users",
+                        icon: Users,
+                        label: "Quản lý người dùng",
                         show: user?.role === "admin",
                       },
                       {
@@ -1648,6 +1655,12 @@ export function SiteHeader() {
                       href: "/admin",
                       icon: LayoutDashboard,
                       label: "Quản lý sản phẩm",
+                      show: user?.role === "admin",
+                    },
+                    {
+                      href: "/admin/users",
+                      icon: Users,
+                      label: "Quản lý người dùng",
                       show: user?.role === "admin",
                     },
                     {
