@@ -14,7 +14,15 @@ export function useDeleteUser() {
       return json
     },
     onSuccess: () => {
+      // Cascade từ migration 0004 xoá luôn products/submissions/orders/whitelist
+      // của user/supplier. Invalidate hết các cache liên quan để UI mới ngay.
       qc.invalidateQueries({ queryKey: queryKeys.users.all })
+      qc.invalidateQueries({ queryKey: queryKeys.products.all })
+      qc.invalidateQueries({ queryKey: queryKeys.submissions.all })
+      qc.invalidateQueries({ queryKey: queryKeys.orders.all })
+      qc.invalidateQueries({ queryKey: queryKeys.whitelist.all })
+      qc.invalidateQueries({ queryKey: queryKeys.providers.all })
+      qc.invalidateQueries({ queryKey: queryKeys.notifications.all })
     },
   })
 }
